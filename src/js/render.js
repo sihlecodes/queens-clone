@@ -25,7 +25,6 @@ export function render_mark(target, board, x, y) {
     const mark = board.get_mark(x, y)
     const pos = board.to_global_position(x, y);
 
-
     ctx.clearRect(pos.x, pos.y, board.TILE_SIZE, board.TILE_SIZE);
 
     switch (mark) {

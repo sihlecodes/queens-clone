@@ -116,6 +116,9 @@ export const board = {
     },
 
     cycle_mark: function(x, y) {
+        if (!this.within_bounds(x, y))
+            return 
+
         let mark = this._marks_grid[y][x];
 
         if (!mark)
