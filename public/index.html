@@ -5,35 +5,20 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Queens Clone</title>
         <style rel="stylesheet">
-            canvas {
-                image-rendering: optimizeQuality;
+            svg {
                 position: absolute;
                 /*border: 1px solid #000000;*/
                 touch-action: none;
-                width: 640px;
-                height: 640px;
             }
             p {
                 position: absolute;
                 top: 644px;
             }
-            img {
-                display: none;
-            }
-            svg {
-                position: absolute;
-                top: 644px;
-                border: 1px solid #000000;
-            }
         </style>
     </head>
     <body>
-        <canvas id="board_canvas" width="640" height="640"></canvas>
-        <canvas id="marks_canvas" width="640" height="640"></canvas>
-
-        <img id="queen" src="./images/Queen.svg" />
+        <svg id="svg-board-canvas" width="640" height="640"></svg>
+        <svg id="svg-marks-canvas" width="640" height="640"></svg>
         <script src="./js/game.js" type="module"></script>
-        <svg id="svg" width="640" height="640">
-        </svg>
     </body>
 </html>

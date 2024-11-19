@@ -38,12 +38,12 @@ export class StateMachine {
                 }
 
                 this.previous_mouse_position = global
-                console.log('set ' + `(${this.previous_mouse_position.x}, ${this.previous_mouse_position.y})`);
+                // console.log('set ' + `(${this.previous_mouse_position.x}, ${this.previous_mouse_position.y})`);
                 break;
 
             case 'touchmove':
             case 'mousemove':
-                console.log('check ' + `(${global.x}, ${global.y})`);
+                // console.log('check ' + `(${global.x}, ${global.y})`);
                 if (this.previous_mouse_position.x === global.x &&
                     this.previous_mouse_position.y === global.y)
                     break;

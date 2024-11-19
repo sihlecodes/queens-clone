@@ -1,3 +1,4 @@
+import { SVGToCanvasContext } from "./adapters.js";
 import { Board, Marks, TILE_SIZE } from "./board.js";
 
 const default_color_map = {
@@ -31,7 +32,7 @@ export class Renderer {
 
     render_mark(x, y) {
         const board = this.board;
-        const ctx = this.marks_canvas.getContext("2d");
+        const ctx = new SVGToCanvasContext(this.marks_canvas);
 
         const mark = board.get_mark(x, y);
         const pos = Board.to_global_position(x, y);
@@ -65,8 +66,8 @@ export class Renderer {
             case Marks.QUEEN:
                 var width = TILE_SIZE / 2;
                 var height = TILE_SIZE / 2;
-                let image = document.getElementById("queen");
-                ctx.drawImage(image,
+
+                ctx.drawImageFromSource('./images/Queen.svg',
                     pos.x + (TILE_SIZE - width) / 2,
                     pos.y + (TILE_SIZE - height) / 2,
                     width, height);
@@ -77,7 +78,7 @@ export class Renderer {
 
     render_board() {
         let board = this.board;
-        let ctx = this.board_canvas.getContext("2d");
+        let ctx = new SVGToCanvasContext(this.board_canvas);
 
         board.iterate((x, y, color) => {
             const pos = Board.to_global_position(x, y);

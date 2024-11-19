@@ -4,8 +4,8 @@ import { StateMachine } from './input_handler.js';
 
 const Game = {
     start: function () {
-        const board_canvas = document.getElementById('board_canvas');
-        const marks_canvas = document.getElementById('marks_canvas');
+        const board_canvas = document.getElementById('svg-board-canvas');
+        const marks_canvas = document.getElementById('svg-marks-canvas');
 
         const board = new Board();
         const renderer = new Renderer(board_canvas, marks_canvas, board);
