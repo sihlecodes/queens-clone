@@ -1,0 +1,24 @@
+{
+  "name": "queens-clone",
+  "version": "0.0.1",
+  "description": "A clone of the LinkedIn game 'Queens'.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sihlcodes/queens-clone.git"
+  },
+  "author": "Siphesihle Mhlongo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sihlcodes/queens-clone/issues"
+  },
+  "homepage": "https://github.com/sihlcodes/queens-clone#readme",
+  "dependencies": {
+    "connect-livereload": "^0.6.1",
+    "express": "^4.21.1",
+    "livereload": "^0.9.3"
+  }
+}
