@@ -33,7 +33,7 @@ export const Marks = {
     QUEEN: 2,
 };
 
-let default_grid =  [
+const old_default_grid =  [
     [2, 2, 2, 11, 11, 11, 11, 11, 11, 11, 11],
     [1, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11],
     [2, 2, 2, 11, 11, 11, 11, 11, 11, 11, 11],
@@ -47,12 +47,24 @@ let default_grid =  [
     [11, 11, 11, 11, 11, 8, 6, 6, 9, 9, 9],
 ];
 
+const default_grid  = [
+    [11, 11, 11, 11, 11, 11, 11, 11, 11],
+    [11, 11, 11, 11, 4, 11, 11, 11, 11],
+    [11, 4, 4, 4, 4, 4, 2, 2, 11],
+    [11, 11, 8, 8, 4, 2, 2, 11, 11],
+    [6, 11, 11, 8, 4, 2, 11, 11, 5],
+    [6, 6, 11, 11, 4, 11, 11, 5, 5],
+    [3, 6, 6, 11, 11, 11, 7, 1, 5],
+    [3, 3, 6, 6, 11, 7, 7, 1, 5],
+    [3, 6, 6, 6, 6, 6, 1, 1, 1],
+];
+
 export const TILE_SIZE = 48;
 
 export class Board {
     constructor(grid=default_grid) {
-        this.grid = default_grid;
         this._marks_grid = [];
+        this.grid = grid;
 
         this.initialize();
     }
