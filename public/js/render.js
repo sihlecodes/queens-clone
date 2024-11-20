@@ -1,4 +1,4 @@
-import { SVGToCanvasContext } from "./adapters.js";
+import { LayeredSVGToCanvasContext } from "./adapters.js";
 import { Board, Marks, TILE_SIZE } from "./board.js";
 
 const default_color_map = {
@@ -23,16 +23,44 @@ function drawLine(ctx, startX, startY, endX, endY) {
 }
 
 export class Renderer {
-    constructor(board_canvas, marks_canvas, board, color_map = default_color_map) {
-        this.board_canvas = board_canvas;
-        this.marks_canvas = marks_canvas;
+    constructor(canvas, board, color_map = default_color_map) {
+        this.canvas = new LayeredSVGToCanvasContext(canvas, 'board');
         this.board = board;
         this.color_map = color_map;
+        this.invalid_marks = [];
+    }
+
+    render_invalid(cells) {
+        const ctx = this.canvas.layer('errors');
+
+        for (const cell of cells) {
+            const relative = this.board.from_relative_int(cell);
+            const global = Board.to_global_position(relative.x, relative.y);
+
+            ctx.filter = 'url(#invalid_color)';
+            ctx.fillStyle = 'url(#invalid_marks)';
+
+            const mark = ctx.fillRect(global.x, global.y, TILE_SIZE, TILE_SIZE);
+            this.invalid_marks.push(mark)
+        }
+    }
+
+    clear_invalid() {
+        for (const mark of this.invalid_marks)
+            this.canvas.layer('errors').removeChild(mark);
+
+        this.invalid_marks = []
+
+        // TODO: reintroduce this method
+        // const errors = this.canvas.layer('errors');
+
+        // for (const error of errors.get_children())
+        //     errors.removeChild(error);
     }
 
     render_mark(x, y) {
         const board = this.board;
-        const ctx = new SVGToCanvasContext(this.marks_canvas);
+        const ctx = this.canvas.layer('marks');
 
         const mark = board.get_mark(x, y);
         const pos = Board.to_global_position(x, y);
@@ -47,19 +75,20 @@ export class Renderer {
                 ctx.fillStyle = "black";
                 ctx.lineWidth = 1;
 
-                var width = TILE_SIZE / 4;
-                var height = TILE_SIZE / 4;
+                var width = TILE_SIZE / 5;
+                var height = TILE_SIZE / 5;
 
-                const leftX = pos.x + (TILE_SIZE - width) / 2;
-                const topY = pos.y + (TILE_SIZE - height) / 2;
-                const rightX = leftX + width;
+                const left_x = pos.x + (TILE_SIZE - width) / 2;
+                const top_y = pos.y + (TILE_SIZE - height) / 2;
+                const bottom_y = top_y + height;
+                const right_x = left_x + width;
 
                 ctx.beginPath();
-                ctx.moveTo(leftX, topY);
-                ctx.lineTo(leftX + width, topY + height);
+                ctx.moveTo(left_x, top_y);
+                ctx.lineTo(right_x, bottom_y);
 
-                ctx.moveTo(rightX, topY);
-                ctx.lineTo(leftX, topY + height);
+                ctx.moveTo(right_x, top_y);
+                ctx.lineTo(left_x, bottom_y);
                 ctx.stroke();
                 break;
 
@@ -78,7 +107,7 @@ export class Renderer {
 
     render_board() {
         let board = this.board;
-        let ctx = new SVGToCanvasContext(this.board_canvas);
+        let ctx = this.canvas.layer('board');
 
         board.iterate((x, y, color) => {
             const pos = Board.to_global_position(x, y);
