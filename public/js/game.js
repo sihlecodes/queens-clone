@@ -4,12 +4,22 @@ import { StateMachine } from './input_handler.js';
 
 const Game = {
     start: function () {
-        const board_canvas = document.getElementById('svg-board-canvas');
-        const marks_canvas = document.getElementById('svg-marks-canvas');
-
+        const canvas = document.getElementById('svg-canvas');
         const board = new Board();
-        const renderer = new Renderer(board_canvas, marks_canvas, board);
+        const renderer = new Renderer(canvas, board);
         const state = new StateMachine();
+
+        board.handlers.on_queens_check = function() {
+            renderer.clear_invalid();
+        }
+
+        board.handlers.on_invalid_queens = function(cells) {
+            renderer.render_invalid(cells);
+        }
+
+        board.handlers.on_win = function() {
+            console.log('you win!');
+        }
 
         state.handlers.on_clear = function(x, y) {
             board.set_mark(x, y, Marks.NONE);
@@ -28,7 +38,7 @@ const Game = {
 
         renderer.render_board();
 
-        this.register_events(board, marks_canvas, state);
+        this.register_events(board, canvas, state);
     },
 
     register_events: function(board, element, state) {
@@ -56,7 +66,6 @@ const Game = {
         element.add_event_listener('mousemove', nop);
         element.add_event_listener('mouseup', nop);
         element.add_event_listener('mouseleave', nop);
-
         element.add_event_listener('touchstart', first_touch);
         element.add_event_listener('touchmove', first_touch);
         element.add_event_listener('touchend', nop);
