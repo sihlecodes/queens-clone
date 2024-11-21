@@ -6,38 +6,13 @@ export const Marks = {
     QUEEN: 2,
 };
 
-const old_default_grid =  [
-    [2, 2, 2, 11, 11, 11, 11, 11, 11, 11, 11],
-    [1, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11],
-    [2, 2, 2, 11, 11, 11, 11, 11, 11, 11, 11],
-    [2, 11, 11, 11, 10, 10, 10, 11, 6, 6, 11],
-    [2, 2, 2, 11, 10, 3, 10, 11, 11, 6, 11],
-    [5, 5, 5, 11, 10, 3, 10, 6, 6, 6, 11],
-    [5, 11, 11, 11, 10, 3, 10, 6, 9, 9, 9],
-    [5, 11, 4, 4, 10, 10, 10, 6, 9, 7, 9],
-    [5, 11, 4, 11, 8, 8, 6, 6, 9, 7, 9],
-    [5, 11, 4, 11, 11, 8, 8, 6, 9, 7, 9],
-    [11, 11, 11, 11, 11, 8, 6, 6, 9, 9, 9],
-];
-
-const default_grid  = [
-    [11, 11, 11, 11, 11, 11, 11, 11, 11],
-    [11, 11, 11, 11, 4, 11, 11, 11, 11],
-    [11, 4, 4, 4, 4, 4, 2, 2, 11],
-    [11, 11, 8, 8, 4, 2, 2, 11, 11],
-    [6, 11, 11, 8, 4, 2, 11, 11, 5],
-    [6, 6, 11, 11, 4, 11, 11, 5, 5],
-    [3, 6, 6, 11, 11, 11, 7, 1, 5],
-    [3, 3, 6, 6, 11, 7, 7, 1, 5],
-    [3, 6, 6, 6, 6, 6, 1, 1, 1],
-];
 
 export const TILE_SIZE = 48;
 
 export class Board {
-    constructor(grid=default_grid) {
+    constructor(layout) {
         this.queens = new QueensValidator();
-        this.grid = grid;
+        this.layout = layout;
         this._marks_grid = [];
         this.initialize_marks_grid();
 
@@ -227,15 +202,15 @@ export class Board {
         if (!this.within_bounds(x, y))
             return -1
 
-        return this.grid[y][x];
+        return this.layout[y][x];
     }
 
     rows() {
-        return this.grid.length;
+        return this.layout.length;
     }
 
     columns() {
-        return this.grid[0].length;
+        return this.layout[0].length;
     }
 
     within_bounds(x, y) {
