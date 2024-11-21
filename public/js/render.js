@@ -30,7 +30,7 @@ export class Renderer {
         this.invalid_marks = [];
     }
 
-    render_invalid(cells) {
+    render_invalid_cells(cells) {
         const ctx = this.canvas.layer('errors');
 
         for (const cell of cells) {
@@ -45,9 +45,9 @@ export class Renderer {
         }
     }
 
-    clear_invalid() {
+    clear_invalid_cells() {
         for (const mark of this.invalid_marks)
-            this.canvas.layer('errors').removeChild(mark);
+            this.canvas.layer('errors').remove_child(mark);
 
         this.invalid_marks = []
 

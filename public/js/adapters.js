@@ -8,14 +8,22 @@ export class SVGToCanvasContext {
         this.path = [];
     }
 
-    appendChild(child) {
+    create_element(name) {
+        return document.createElementNS('http://www.w3.org/2000/svg', name);
+    }
+
+    append_child(child) {
         this.svg.appendChild(child);
         return child;
     }
 
-    removeChild(child) {
+    remove_child(child) {
         this.svg.removeChild(child);
         return child;
+    }
+
+    get_children() {
+        return this.svg.children;
     }
 
     rect(x, y, width, height) {
@@ -26,10 +34,6 @@ export class SVGToCanvasContext {
         this.closePath();
     }
 
-    get_children() {
-        return this.svg.children;
-    }
-
     clearRect(x, y, width, height) {
         for (const child of this.get_children()) {
             const bounds = child.getBBox();
@@ -38,7 +42,7 @@ export class SVGToCanvasContext {
                 (bounds.x + bounds.width) <= (x + width) &&
                 bounds.y >= y &&
                 (bounds.y + bounds.height) <= (y + height)) {
-                    this.removeChild(child);
+                    this.remove_child(child);
                 }
         }
     }
@@ -48,7 +52,7 @@ export class SVGToCanvasContext {
     }
 
     fillRect(x, y, width, height) {
-        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        const rect = this.create_element('rect');
 
         rect.setAttribute('x', x);
         rect.setAttribute('y', y);
@@ -58,11 +62,11 @@ export class SVGToCanvasContext {
         rect.setAttribute('filter', this.filter);
         rect.setAttribute('stroke-width', 0);
 
-        return this.appendChild(rect);
+        return this.append_child(rect);
     }
 
     drawImageFromSource(href, x, y, width, height) {
-        const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+        const image = this.create_element('image');;
 
         image.setAttribute('href', href);
         image.setAttribute('x', x);
@@ -71,7 +75,7 @@ export class SVGToCanvasContext {
         image.setAttribute('width', width);
         image.setAttribute('height', height);
 
-        return this.appendChild(image);
+        return this.append_child(image);
     }
 
     beginPath() {
@@ -87,7 +91,7 @@ export class SVGToCanvasContext {
     }
 
     stroke() {
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const path = this.create_element('path');
 
         path.setAttribute('d', this.path.join(','));
         path.setAttribute('stroke', this.strokeStyle);
@@ -95,7 +99,7 @@ export class SVGToCanvasContext {
         path.setAttribute('filter', this.filter);
         path.setAttribute('stroke-width', this.lineWidth);
 
-        return this.appendChild(path);
+        return this.append_child(path);
     }
 }
 
@@ -118,18 +122,18 @@ export class LayeredSVGToCanvasContext extends SVGToCanvasContext {
         return this.children;
     }
 
-    appendChild(child) {
+    append_child(child) {
         this.children.push(child);
-        return super.appendChild(child);
+        return super.append_child(child);
     }
 
-    removeChild(child) {
+    remove_child(child) {
         const index = this.children.indexOf(child);
 
         if (index < 0)
             return;
 
         this.children.splice(index, 1);
-        return super.removeChild(child);
+        return super.remove_child(child);
     }
 }
