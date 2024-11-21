@@ -10,17 +10,20 @@ const Game = {
         const renderer = new Renderer(canvas, board);
         const state = new StateMachine();
 
-        board.handlers.on_queens_check = function() {
+        board.handlers.on_remove_queen = function() {
             renderer.clear_invalid_cells();
-        }
+        };
 
         board.handlers.on_invalid_queens = function(cells) {
             renderer.render_invalid_cells(cells);
         };
 
-        board.handlers.on_win = function() {
-            console.log('you win!');
-        }
+        board.handlers.on_valid_queens = function(num_queens) {
+            const win_condition = Math.min(board.columns(), board.rows());
+
+            if (num_queens === win_condition)
+                console.log('you win!');
+        };
 
         state.handlers.on_clear = function(x, y) {
             board.set_mark(x, y, Marks.NONE);
