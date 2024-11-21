@@ -1,11 +1,12 @@
 import { Renderer } from './render.js';
 import { Board, Marks } from './board.js';
 import { StateMachine } from './input_handler.js';
+import { default_layout } from './assets.js';
 
 const Game = {
     start: function () {
         const canvas = document.getElementById('svg-canvas');
-        const board = new Board();
+        const board = new Board(default_layout);
         const renderer = new Renderer(canvas, board);
         const state = new StateMachine();
 
