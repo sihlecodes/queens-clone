@@ -11,12 +11,12 @@ const Game = {
         const state = new StateMachine();
 
         board.handlers.on_queens_check = function() {
-            renderer.clear_invalid();
+            renderer.clear_invalid_cells();
         }
 
         board.handlers.on_invalid_queens = function(cells) {
-            renderer.render_invalid(cells);
-        }
+            renderer.render_invalid_cells(cells);
+        };
 
         board.handlers.on_win = function() {
             console.log('you win!');
