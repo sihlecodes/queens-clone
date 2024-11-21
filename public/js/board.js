@@ -17,16 +17,20 @@ export class Board {
         this.initialize_marks_grid();
 
         this.handlers = {
-            on_invalid_queens: null,
-            on_queens_check: null,
-            on_win: null,
+            on_invalid_queens: undefined,
+            on_valid_queens: undefined,
+            on_remove_queen: undefined,
         };
 
-        this.queens.handlers.on_validity_check = () => {
-            this.handlers.on_queens_check?.();
+        this.queens.handlers.on_valid_queens = (num_queens) => {
+            this.handlers.on_valid_queens?.(num_queens);
         };
 
-        this.queens.handlers.on_invalid_surrounding = (coords) => {
+        this.queens.handlers.on_remove_queen = () => {
+            this.handlers.on_remove_queen?.();
+        };
+
+        this.queens.handlers.on_invalid_proximity = (coords) => {
             const cells = coords.map(({x, y}) => this.to_relative_int(x, y));
             this.handlers.on_invalid_queens?.(cells);
         }
@@ -42,7 +46,6 @@ export class Board {
         this.queens.handlers.on_invalid_row = (row) => {
             this.handlers.on_invalid_queens?.(this.get_cells_by_row(row));
         };
-            // this.handlers.on_invalid_queens?.(new Set([this.to_relative_int(startX, startY)]));
     }
 
     initialize_marks_grid() {
@@ -66,18 +69,6 @@ export class Board {
                     break outer;
             }
         }
-    }
-
-    check_completion(start_x, start_y) {
-        let queens = new QueenCollection();
-
-
-        this.iterate(function(x, y, color, mark) {
-            if (queens.length() === this.columns()) {
-                this.handlers.on_win?.();
-                return true;
-            }
-        });
     }
 
     get_cells_by_column(x) {
@@ -174,10 +165,10 @@ export class Board {
         const color = this.get_color(x, y);
 
         if (mark === Marks.QUEEN) {
-            this.queens.push_and_check_validity(x, y, color);
+            this.queens.push_and_validate(x, y, color);
         }
         else if (mark === Marks.NONE && current_mark === Marks.QUEEN) {
-            this.queens.remove_and_ceck_validity(x, y, color);
+            this.queens.remove_and_revalidate(x, y, color);
         }
 
         this._marks_grid[y][x] = mark;

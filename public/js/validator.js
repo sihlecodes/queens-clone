@@ -1,29 +1,32 @@
 import { QueenCollection } from "./collections.js";
 
 export class QueensValidator {
-    constructor(board) {
-        this.board = board;
+    constructor() {
         this._queens = new QueenCollection();
+
         this.handlers = {
-            on_invalid_surrounding: null,
-            on_invalid_color: null,
-            on_invalid_column: null,
-            on_invalid_row: null,
-            on_validity_check: null,
+            on_invalid_proximity: undefined,
+            on_invalid_color: undefined,
+            on_invalid_column: undefined,
+            on_invalid_row: undefined,
+            on_remove_queen: undefined,
+            on_valid_queens: undefined,
         };
     }
 
-    batch_check_validity() {
-        this.handlers.on_validity_check?.();
+    revalidate() {
+        let is_valid = false;
 
         for (let i = 0; i < this._queens.length(); i++) {
             const {column, row, color} = this._queens.at(i);
 
-            this.check_validity(this._queens.slice(i+1), column, row, color);
+            is_valid |= this.validate(this._queens.slice(i+1), column, row, color);
         }
+
+        return is_valid;
     }
 
-    check_surrounding_cells(queens, x, y) {
+    get_nearby_queen_positions(queens, x, y) {
         const coords = [{x, y}];
 
         for (let i = 0; i < queens.length(); i++) {
@@ -37,30 +40,47 @@ export class QueensValidator {
             }
         }
 
-        if (coords.length > 1)
-            this.handlers.on_invalid_surrounding?.(coords);
+        return coords;
     }
 
-    check_validity(queens, x, y, color) {
-        this.check_surrounding_cells(queens, x, y);
+    validate(queens, x, y, color) {
+        const queen_positions = this.get_nearby_queen_positions(queens, x, y);
 
-        if (queens.includes_color(color))
+        let surrounded = queen_positions.length > 1;
+        const includes_color = queens.includes_color(color);
+        const includes_column = queens.includes_column(x);
+        const includes_row = queens.includes_row(y);
+        const is_valid = !(surrounded | includes_color | includes_column | includes_row);
+
+        if (surrounded)
+            this.handlers.on_invalid_proximity?.(queen_positions);
+
+        if (includes_color)
             this.handlers.on_invalid_color?.(x, y);
 
-        if (queens.includes_column(x))
+        if (includes_column)
             this.handlers.on_invalid_column?.(x);
 
-        if (queens.includes_row(y))
+        if (includes_row)
             this.handlers.on_invalid_row?.(y);
+
+        return is_valid;
     }
 
-    remove_and_ceck_validity(x, y, color) {
+    remove_and_revalidate(x, y, color) {
+        this.handlers.on_remove_queen?.();
         this._queens.remove(x, y, color);
-        this.batch_check_validity();
+
+        if(this.revalidate())
+            this.handlers.on_valid_queens?.(this._queens.length());
     }
 
-    push_and_check_validity(x, y, color) {
-        this.check_validity(this._queens, x, y, color);
+    push_and_validate(x, y, color) {
+        const is_valid = this.validate(this._queens, x, y, color);
+
         this._queens.push(x, y, color);
+
+        if (is_valid)
+            this.handlers.on_valid_queens?.(this._queens.length());
     }
 }
