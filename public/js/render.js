@@ -1,5 +1,5 @@
 import { LayeredSVGToCanvasContext } from "./adapters.js";
-import { Board, Marks, TILE_SIZE } from "./board.js";
+import { Marks, TILE_SIZE } from "./board.js";
 
 const default_color_map = {
     1: "#b7a5dd",
@@ -30,12 +30,33 @@ export class Renderer {
         this.invalid_marks = [];
     }
 
+    render_mouse_position(x, y) {
+        if (!this.board.within_bounds(x, y))
+            return;
+
+        const global = this.board.to_global_position(x, y);
+        const ctx = this.canvas.layer('mouse');
+
+        ctx.fillStyle = '#5554'
+        ctx.fillRect(global.x, global.y, TILE_SIZE, TILE_SIZE);
+    }
+
+    clear_mouse_position(x, y) {
+        if (!this.board.within_bounds(x, y))
+            return;
+
+        const global = this.board.to_global_position(x, y);
+        const ctx = this.canvas.layer('mouse');
+
+        ctx.clearRect(global.x, global.y, TILE_SIZE, TILE_SIZE);
+    }
+
     render_invalid_cells(cells) {
         const ctx = this.canvas.layer('errors');
 
         for (const cell of cells) {
             const relative = this.board.from_relative_int(cell);
-            const global = Board.to_global_position(relative.x, relative.y);
+            const global = this.board.to_global_position(relative.x, relative.y);
 
             ctx.filter = 'url(#invalid_color)';
             ctx.fillStyle = 'url(#invalid_marks)';
@@ -63,7 +84,7 @@ export class Renderer {
         const ctx = this.canvas.layer('marks');
 
         const mark = board.get_mark(x, y);
-        const pos = Board.to_global_position(x, y);
+        const pos = board.to_global_position(x, y);
 
         ctx.clearRect(pos.x, pos.y, TILE_SIZE, TILE_SIZE);
 
@@ -110,7 +131,7 @@ export class Renderer {
         let ctx = this.canvas.layer('board');
 
         board.iterate((x, y, color) => {
-            const pos = Board.to_global_position(x, y);
+            const pos = board.to_global_position(x, y);
 
             ctx.strokeStyle = "gray";
             ctx.fillStyle = this.color_map[color];
@@ -123,7 +144,7 @@ export class Renderer {
         });
 
         board.iterate((x, y, color) => {
-            const pos = Board.to_global_position(x, y);
+            const pos = board.to_global_position(x, y);
 
             ctx.lineWidth = 3;
             ctx.strokeStyle = "black";

@@ -1,4 +1,4 @@
-import { Marks } from './board.js'
+import { Board, Marks } from './board.js'
 
 const States = {
     NOP: 0,
@@ -10,12 +10,14 @@ const States = {
 export class StateMachine {
     constructor() {
         this.state = States.NOP;
-        this.previous_mouse_position = {x: 0, y: 0};
+        this.previous_global = {x: 0, y: 0};
 
         this.handlers = {
-            on_clear: null,
-            on_mark: null,
-            on_toggle: null,
+            on_clear: undefined,
+            on_mark: undefined,
+            on_toggle: undefined,
+            on_hover_changing: undefined,
+            on_hover_changed: undefined,
         }
 
         this.start = null;
@@ -37,16 +39,26 @@ export class StateMachine {
                         break;
                 }
 
-                this.previous_mouse_position = global
+                this.starting_global = this.previous_global = global
                 // console.log('set ' + `(${this.previous_mouse_position.x}, ${this.previous_mouse_position.y})`);
                 break;
 
             case 'touchmove':
             case 'mousemove':
                 // console.log('check ' + `(${global.x}, ${global.y})`);
-                if (this.previous_mouse_position.x === global.x &&
-                    this.previous_mouse_position.y === global.y)
+                if (this.previous_global.x === global.x &&
+                    this.previous_global.y === global.y)
                     break;
+
+
+                const previous_relative = Board.to_relative_position(this.previous_global.x, this.previous_global.y);
+
+                if (relative.x !== previous_relative.x || relative.y !== previous_relative.y) {
+                    this.handlers.on_hover_changing?.(previous_relative.x, previous_relative.y);
+                    this.handlers.on_hover_changed?.(relative.x, relative.y);
+                }
+
+                this.previous_global = global;
 
                 if (mark === Marks.QUEEN)
                     break;
@@ -65,8 +77,8 @@ export class StateMachine {
             case 'mouseup':
                 this.state = States.NOP;
 
-                if (this.previous_mouse_position.x !== global.x &&
-                    this.previous_mouse_position.y !== global.y)
+                if (this.starting_global.x !== global.x &&
+                    this.starting_global.y !== global.y)
                     break;
 
                 this.handlers.on_toggle?.(relative.x, relative.y);

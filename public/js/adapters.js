@@ -1,11 +1,12 @@
 export class SVGToCanvasContext {
     constructor(svg) {
         this.svg = svg;
+        this.path = [];
+
         this.strokeStyle = 'black';
         this.fillStyle = 'black';
         this.filter = 'none';
         this.lineWidth = 0;
-        this.path = [];
     }
 
     create_element(name) {
@@ -38,11 +39,13 @@ export class SVGToCanvasContext {
         for (const child of this.get_children()) {
             const bounds = child.getBBox();
 
-            if (bounds.x >= x &&
-                (bounds.x + bounds.width) <= (x + width) &&
-                bounds.y >= y &&
-                (bounds.y + bounds.height) <= (y + height)) {
-                    this.remove_child(child);
+            // bounds occasionally come with rounding errors
+            // Math.trunc removes these errors
+            if (Math.trunc(bounds.x) >= x &&
+                Math.trunc(bounds.x + bounds.width) <= (x + width) &&
+                Math.trunc(bounds.y) >= y &&
+                Math.trunc(bounds.y + bounds.height) <= (y + height)) {
+                    return this.remove_child(child);
                 }
         }
     }

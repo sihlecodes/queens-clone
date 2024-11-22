@@ -25,6 +25,14 @@ const Game = {
                 console.log('you win!');
         };
 
+        state.handlers.on_hover_changing = function(x, y) {
+            renderer.clear_mouse_position(x, y);
+        };
+
+        state.handlers.on_hover_changed = function(x, y) {
+            renderer.render_mouse_position(x, y);
+        };
+
         state.handlers.on_clear = function(x, y) {
             board.set_mark(x, y, Marks.NONE);
             renderer.render_mark(x, y);
@@ -56,7 +64,7 @@ const Game = {
                     y: event.clientY - rect.top,
                 }
 
-                const relative = Board.to_relative_position(global.x, global.y);
+                const relative = board.to_relative_position(global.x, global.y);
                 const mark = board.get_mark(relative.x, relative.y);
 
                 state.handle(name, global, relative, mark);
