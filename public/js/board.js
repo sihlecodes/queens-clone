@@ -13,7 +13,7 @@ export class Board {
     constructor(layout) {
         this.queens = new QueensValidator();
         this.layout = layout;
-        this._marks_grid = [];
+        this.marks_grid = [];
         this.initialize_marks_grid();
 
         this.handlers = {
@@ -49,13 +49,11 @@ export class Board {
     }
 
     initialize_marks_grid() {
-        this._marks = [];
-
         for (let y = 0; y < this.rows(); y++) {
-            this._marks_grid.push([]);
+            this.marks_grid.push([]);
 
             for (let x = 0; x < this.columns(); x++) {
-                this._marks_grid[y].push(Marks.NONE);
+                this.marks_grid[y].push(Marks.NONE);
             }
         }
     }
@@ -127,11 +125,19 @@ export class Board {
         }
     }
 
+    to_relative_position(global_x, global_y) {
+        return Board.to_relative_position(global_x, global_y);
+    }
+
     static to_relative_position(global_x, global_y) {
         return {
             x: Math.floor((global_x - 5) / TILE_SIZE),
             y: Math.floor((global_y - 5) / TILE_SIZE),
         };
+    }
+
+    to_global_position(relative_x, relative_y) {
+        return Board.to_global_position(relative_x, relative_y);
     }
 
     static to_global_position(relative_x, relative_y) {
@@ -145,7 +151,7 @@ export class Board {
         if (!this.within_bounds(x, y))
             return
 
-        let mark = this._marks_grid[y][x];
+        let mark = this.marks_grid[y][x];
 
         if (!mark)
             mark = 1;
@@ -171,14 +177,14 @@ export class Board {
             this.queens.remove_and_revalidate(x, y, color);
         }
 
-        this._marks_grid[y][x] = mark;
+        this.marks_grid[y][x] = mark;
     }
 
     get_mark(x, y) {
         if (!this.within_bounds(x, y))
             return Marks.NONE;
 
-        return this._marks_grid[y][x];
+        return this.marks_grid[y][x];
     }
 
     width() {
