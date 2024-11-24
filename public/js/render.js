@@ -24,7 +24,7 @@ function drawLine(ctx, startX, startY, endX, endY) {
 
 export class Renderer {
     constructor(canvas, board, color_map = default_color_map) {
-        this.canvas = new LayeredSVGToCanvasContext(canvas, 'board');
+        this.canvas = new LayeredSVGToCanvasContext(canvas);
         this.board = board;
         this.color_map = color_map;
         this.invalid_marks = [];

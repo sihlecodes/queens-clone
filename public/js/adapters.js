@@ -107,36 +107,21 @@ export class SVGToCanvasContext {
 }
 
 export class LayeredSVGToCanvasContext extends SVGToCanvasContext {
-    constructor(svg, name = 'root') {
+    constructor(svg, name = 'root', layers={}) {
         super(svg);
         this.name = name;
-        this.layers = {name: this};
-        this.children = [];
+        this.layers = layers;
     }
 
     layer(name) {
-        if (!(name in this.layers))
-            this.layers[name] = new LayeredSVGToCanvasContext(this.svg, name);
+        if (!(name in this.layers)) {
+            const group = this.create_element('g');
+            group.setAttribute('id', name);
+
+            this.append_child(group);
+            this.layers[name] = new LayeredSVGToCanvasContext(group, name, this.layers);
+        }
 
         return this.layers[name];
-    }
-
-    get_children() {
-        return this.children;
-    }
-
-    append_child(child) {
-        this.children.push(child);
-        return super.append_child(child);
-    }
-
-    remove_child(child) {
-        const index = this.children.indexOf(child);
-
-        if (index < 0)
-            return;
-
-        this.children.splice(index, 1);
-        return super.remove_child(child);
     }
 }
