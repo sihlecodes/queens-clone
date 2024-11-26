@@ -27,7 +27,8 @@ export class Renderer {
         this.canvas = new LayeredSVGToCanvasContext(canvas);
         this.board = board;
         this.color_map = color_map;
-        this.invalid_marks = [];
+        this.invalid_marks = {};
+        this.invalid_queens = [];
     }
 
     render_mouse_position(x, y) {
@@ -53,6 +54,7 @@ export class Renderer {
 
     render_invalid_cells(cells) {
         const ctx = this.canvas.layer('errors');
+        const marks_ctx = this.canvas.layer('marks');
 
         for (const cell of cells) {
             const relative = this.board.from_relative_int(cell);
@@ -61,22 +63,35 @@ export class Renderer {
             ctx.filter = 'url(#invalid_color)';
             ctx.fillStyle = 'url(#invalid_marks)';
 
-            const mark = ctx.fillRect(global.x, global.y, TILE_SIZE, TILE_SIZE);
-            this.invalid_marks.push(mark)
+            const mark = this.board.get_mark(relative.x, relative.y);
+
+            if (mark === Marks.QUEEN) {
+                const queen = marks_ctx.extract(global.x, global.y, TILE_SIZE, TILE_SIZE);
+
+                if (queen) {
+                    queen.setAttribute('filter', 'url(#invalid_color');
+                    this.invalid_queens.push(queen);
+                }
+            }
+
+            if (!(cell in this.invalid_marks)) {
+                const invalid_mark = ctx.fillRect(global.x, global.y, TILE_SIZE, TILE_SIZE);
+                this.invalid_marks[cell] = invalid_mark;
+            }
         }
     }
 
     clear_invalid_cells() {
-        for (const mark of this.invalid_marks)
+        const marks = Object.values(this.invalid_marks);
+
+        for (const mark of marks)
             this.canvas.layer('errors').remove_child(mark);
 
-        this.invalid_marks = []
+        for (const queen of this.invalid_queens)
+            queen.setAttribute('filter', 'none');
 
-        // TODO: reintroduce this method
-        // const errors = this.canvas.layer('errors');
-
-        // for (const error of errors.get_children())
-        //     errors.removeChild(error);
+        this.invalid_queens = []
+        this.invalid_marks = {}
     }
 
     render_mark(x, y) {

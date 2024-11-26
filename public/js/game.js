@@ -25,6 +25,10 @@ const Game = {
                 console.log('you win!');
         };
 
+        board.handlers.on_mark_applied = function(x, y) {
+            renderer.render_mark(x, y);
+        }
+
         state.handlers.on_hover_changing = function(x, y) {
             renderer.clear_mouse_position(x, y);
         };
@@ -35,17 +39,14 @@ const Game = {
 
         state.handlers.on_clear = function(x, y) {
             board.set_mark(x, y, Marks.NONE);
-            renderer.render_mark(x, y);
         };
 
         state.handlers.on_mark = function(x, y) {
             board.set_mark(x, y, Marks.BASIC);
-            renderer.render_mark(x, y);
         };
 
         state.handlers.on_toggle = function(x, y) {
             board.cycle_mark(x, y);
-            renderer.render_mark(x, y);
         };
 
         renderer.render_board();
