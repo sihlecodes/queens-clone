@@ -17,6 +17,7 @@ export class Board {
         this.initialize_marks_grid();
 
         this.handlers = {
+            on_mark_applied: undefined,
             on_invalid_queens: undefined,
             on_valid_queens: undefined,
             on_remove_queen: undefined,
@@ -170,14 +171,15 @@ export class Board {
         const current_mark = this.get_mark(x, y);
         const color = this.get_color(x, y);
 
+        this.marks_grid[y][x] = mark;
+        this.handlers.on_mark_applied?.(x, y);
+
         if (mark === Marks.QUEEN) {
             this.queens.push_and_validate(x, y, color);
         }
         else if (mark === Marks.NONE && current_mark === Marks.QUEEN) {
             this.queens.remove_and_revalidate(x, y, color);
         }
-
-        this.marks_grid[y][x] = mark;
     }
 
     get_mark(x, y) {

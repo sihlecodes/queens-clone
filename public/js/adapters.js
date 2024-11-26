@@ -35,7 +35,7 @@ export class SVGToCanvasContext {
         this.closePath();
     }
 
-    clearRect(x, y, width, height) {
+    extract(x, y, width, height) {
         for (const child of this.get_children()) {
             const bounds = child.getBBox();
 
@@ -45,9 +45,16 @@ export class SVGToCanvasContext {
                 Math.trunc(bounds.x + bounds.width) <= (x + width) &&
                 Math.trunc(bounds.y) >= y &&
                 Math.trunc(bounds.y + bounds.height) <= (y + height)) {
-                    return this.remove_child(child);
+                    return child;
                 }
         }
+    }
+
+    clearRect(x, y, width, height) {
+        const child = this.extract(x, y, width, height);
+
+        if (child)
+            return this.remove_child(child);
     }
 
     closePath() {
