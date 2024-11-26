@@ -31,6 +31,15 @@ export class Renderer {
         this.invalid_queens = [];
     }
 
+    animate_completion() {
+        const marks_ctx = this.canvas.layer('marks');
+
+        for (const mark of marks_ctx.get_children()) {
+            if (mark.type === Marks.QUEEN)
+                mark.classList.add('animate');
+        }
+    }
+
     render_mouse_position(x, y) {
         if (!this.board.within_bounds(x, y))
             return;
@@ -125,17 +134,20 @@ export class Renderer {
 
                 ctx.moveTo(right_x, top_y);
                 ctx.lineTo(left_x, bottom_y);
-                ctx.stroke();
+                const annotation = ctx.stroke();
+                annotation.type = Marks.BASIC;
                 break;
 
             case Marks.QUEEN:
                 var width = TILE_SIZE / 2;
                 var height = TILE_SIZE / 2;
 
-                ctx.drawImageFromSource('./images/Queen.svg',
+                const queen = ctx.drawImageFromSource('./images/Queen.svg',
                     pos.x + (TILE_SIZE - width) / 2,
                     pos.y + (TILE_SIZE - height) / 2,
                     width, height);
+
+                queen.type = Marks.QUEEN;
                 break;
         }
 
