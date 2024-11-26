@@ -43,20 +43,19 @@ export class StateMachine {
                 // console.log('set ' + `(${this.previous_mouse_position.x}, ${this.previous_mouse_position.y})`);
                 break;
 
-            case 'touchmove':
             case 'mousemove':
-                // console.log('check ' + `(${global.x}, ${global.y})`);
-                if (this.previous_global.x === global.x &&
-                    this.previous_global.y === global.y)
-                    break;
-
-
                 const previous_relative = Board.to_relative_position(this.previous_global.x, this.previous_global.y);
 
                 if (relative.x !== previous_relative.x || relative.y !== previous_relative.y) {
                     this.handlers.on_hover_changing?.(previous_relative.x, previous_relative.y);
                     this.handlers.on_hover_changed?.(relative.x, relative.y);
                 }
+
+            case 'touchmove':
+                // console.log('check ' + `(${global.x}, ${global.y})`);
+                if (this.previous_global.x === global.x &&
+                    this.previous_global.y === global.y)
+                    break;
 
                 this.previous_global = global;
 
