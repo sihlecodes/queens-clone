@@ -21,8 +21,10 @@ const Game = {
         board.handlers.on_valid_queens = function(num_queens) {
             const win_condition = Math.min(board.columns(), board.rows());
 
-            if (num_queens === win_condition)
+            if (num_queens === win_condition) {
+                renderer.animate_completion();
                 console.log('you win!');
+            }
         };
 
         board.handlers.on_mark_applied = function(x, y) {
