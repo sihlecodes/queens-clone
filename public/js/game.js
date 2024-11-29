@@ -22,8 +22,8 @@ const Game = {
             const win_condition = Math.min(board.columns(), board.rows());
 
             if (num_queens === win_condition) {
-                renderer.animate_completion();
                 console.log('you win!');
+                renderer.animate_completion();
             }
         };
 
