@@ -33,7 +33,6 @@ export class Renderer {
 
     animate_completion() {
         const marks_ctx = this.canvas.layer('marks');
-
         let index = 0;
 
         for (const mark of marks_ctx.get_children()) {
