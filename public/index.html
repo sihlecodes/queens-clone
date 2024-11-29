@@ -16,18 +16,38 @@
             }
             .animate {
                 animation: pulse 1s;
-                transform-origin: 50% 50%;
             }
 
             @keyframes pulse {
                 0% {
-                    scale: 1;
+                    transform:
+                        translate(var(--center-x), var(--center-y))
+                        scale(1)
+
+                        translate(
+                            calc(-1 * var(--center-x)),
+                            calc(-1 * var(--center-y))
+                        );
                 }
                 50% {
-                    scale: 1.3;
+                    transform:
+                        translate(var(--center-x), var(--center-y))
+                        scale(1.4)
+
+                        translate(
+                            calc(-1 * var(--center-x)),
+                            calc(-1 * var(--center-y))
+                        );
                 }
                 100% {
-                    scale: 1;
+                    transform:
+                        translate(var(--center-x), var(--center-y))
+                        scale(1)
+
+                        translate(
+                            calc(-1 * var(--center-x)),
+                            calc(-1 * var(--center-y))
+                        );
                 }
             }
         </style>

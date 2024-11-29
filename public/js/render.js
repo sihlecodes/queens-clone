@@ -34,9 +34,26 @@ export class Renderer {
     animate_completion() {
         const marks_ctx = this.canvas.layer('marks');
 
+        let index = 0;
+
         for (const mark of marks_ctx.get_children()) {
-            if (mark.type === Marks.QUEEN)
-                mark.classList.add('animate');
+            if (mark.type !== Marks.QUEEN)
+                continue;
+
+            const x = mark.getAttribute('x') * 1;
+            const y = mark.getAttribute('y') * 1;
+
+            const width = mark.getAttribute('width') * 1;
+            const height = mark.getAttribute('height') * 1;
+
+            const centerX = x + width / 2;
+            const centerY = y + height / 2;
+
+            mark.style.setProperty('--center-x', `${centerX}px`);
+            mark.style.setProperty('--center-y', `${centerY}px`);
+
+            setTimeout(() => mark.classList.add('animate'), 150 * index);
+            index++;
         }
     }
 
