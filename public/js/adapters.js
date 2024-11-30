@@ -41,10 +41,10 @@ export class SVGToCanvasContext {
 
             // bounds occasionally come with rounding errors
             // Math.trunc removes these errors
-            if (Math.trunc(bounds.x) >= x &&
-                Math.trunc(bounds.x + bounds.width) <= (x + width) &&
-                Math.trunc(bounds.y) >= y &&
-                Math.trunc(bounds.y + bounds.height) <= (y + height)) {
+            if (Math.trunc(bounds.x) >= Math.trunc(x) &&
+                Math.trunc(bounds.x + bounds.width) <= Math.trunc(x + width) &&
+                Math.trunc(bounds.y) >= Math.trunc(y) &&
+                Math.trunc(bounds.y + bounds.height) <= Math.trunc(y + height)) {
                     return child;
                 }
         }
