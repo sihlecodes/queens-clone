@@ -1,12 +1,29 @@
 import { Renderer } from './render.js';
-import { Board, Marks } from './board.js';
+import { Board, Marks, TILE_SIZE } from './board.js';
 import { StateMachine } from './input_handler.js';
 import { default_layout } from './assets.js';
 
+export const Configs = {
+    TILE_SIZE: undefined,
+}
+
 const Game = {
     start: function () {
+
         const canvas = document.getElementById('svg-canvas');
         const board = new Board(default_layout);
+
+        const width = window.screen.width * .8;
+        const height = window.screen.height * .8;
+
+        const smallest = Math.min(width, height);
+        console.log('width: ', width);
+
+        canvas.setAttribute('width', width);
+        canvas.setAttribute('height', height);
+
+        Configs.TILE_SIZE = (smallest - 10) / board.columns();
+
         const renderer = new Renderer(canvas, board);
         const state = new StateMachine();
 
