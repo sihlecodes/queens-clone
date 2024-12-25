@@ -39,9 +39,10 @@ export class StateMachine {
                         break;
                 }
 
-                this.starting_global = this.previous_global = global
+                this.starting_global = this.previous_global = global;
                 // console.log('set ' + `(${this.previous_mouse_position.x}, ${this.previous_mouse_position.y})`);
                 break;
+
 
             case 'mousemove':
                 const previous_relative = Board.to_relative_position(this.previous_global.x, this.previous_global.y);
@@ -52,6 +53,19 @@ export class StateMachine {
                 }
 
             case 'touchmove':
+                if (name === 'touchmove') {
+                    const starting_relative = Board.to_relative_position(this.starting_global.x, this.starting_global.y);
+
+                    switch (this.state) {
+                        case States.CLEARING:
+                            this.handlers.on_clear?.(starting_relative.x, starting_relative.y);
+                            break;
+                        case States.MARKING:
+                            this.handlers.on_mark?.(starting_relative.x, starting_relative.y);
+                            break;
+                    }
+                }
+
                 // console.log('check ' + `(${global.x}, ${global.y})`);
                 if (this.previous_global.x === global.x &&
                     this.previous_global.y === global.y)
