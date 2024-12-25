@@ -1,5 +1,6 @@
 import { LayeredSVGToCanvasContext } from "./adapters.js";
-import { Marks, TILE_SIZE } from "./board.js";
+import { Marks } from "./board.js";
+import { Configs } from "./game.js";
 
 const default_color_map = {
     1: "#b7a5dd",
@@ -57,6 +58,8 @@ export class Renderer {
     }
 
     render_mouse_position(x, y) {
+        const { TILE_SIZE } = Configs;
+
         if (!this.board.within_bounds(x, y))
             return;
 
@@ -68,6 +71,8 @@ export class Renderer {
     }
 
     clear_mouse_position(x, y) {
+        const { TILE_SIZE } = Configs;
+
         if (!this.board.within_bounds(x, y))
             return;
 
@@ -78,6 +83,8 @@ export class Renderer {
     }
 
     render_invalid_cells(cells) {
+        const { TILE_SIZE } = Configs;
+
         const ctx = this.canvas.layer('errors');
         const marks_ctx = this.canvas.layer('marks');
 
@@ -120,6 +127,8 @@ export class Renderer {
     }
 
     render_mark(x, y) {
+        const { TILE_SIZE } = Configs;
+
         const board = this.board;
         const ctx = this.canvas.layer('marks');
 
@@ -170,6 +179,8 @@ export class Renderer {
     }
 
     render_board() {
+        const { TILE_SIZE } = Configs;
+
         let board = this.board;
         let ctx = this.canvas.layer('board');
 
