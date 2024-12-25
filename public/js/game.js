@@ -5,6 +5,7 @@ import { default_layout } from './assets.js';
 
 export const Configs = {
     TILE_SIZE: undefined,
+    RENDER_OFFSET: 5,
 }
 
 const Game = {
@@ -13,16 +14,15 @@ const Game = {
         const canvas = document.getElementById('svg-canvas');
         const board = new Board(default_layout);
 
-        const width = window.screen.width * .8;
-        const height = window.screen.height * .8;
+        const width = window.innerWidth * .8;
+        const height = window.innerHeight * .8;
 
         const smallest = Math.min(width, height);
-        console.log('width: ', width);
 
-        canvas.setAttribute('width', width);
-        canvas.setAttribute('height', height);
+        canvas.setAttribute('width', smallest);
+        canvas.setAttribute('height', smallest);
 
-        Configs.TILE_SIZE = (smallest - 10) / board.columns();
+        Configs.TILE_SIZE = (smallest - Configs.RENDER_OFFSET * 2) / board.columns();
 
         const renderer = new Renderer(canvas, board);
         const state = new StateMachine();

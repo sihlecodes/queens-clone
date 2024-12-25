@@ -6,12 +6,14 @@
         <title>Queens Clone</title>
         <style rel="stylesheet">
             html, body {
-                min-height: 100vh;
                 margin: 0;
                 padding: 0;
             }
+
             svg {
                 position: absolute;
+                margin: auto;
+                inset: 0;
                 /*border: 1px solid #000000;*/
                 touch-action: none;
             }
@@ -58,16 +60,16 @@
         </style>
     </head>
     <body>
-        <svg id="svg-canvas" width="640" height="640">
+        <svg id="svg-canvas">
             <defs>
                 <filter id="invalid_color">
                     <feColorMatrix
-                        in="SourceGraphic"
-                        type="matrix"
-                        values="0 0 0 .50 0
-                                0 0 0 .00 0
-                                0 0 0 .05 0
-                                0 0 0 1.0 0" />
+                    in="SourceGraphic"
+                    type="matrix"
+                    values="0 0 0 .50 0
+                            0 0 0 .00 0
+                            0 0 0 .05 0
+                            0 0 0 1.0 0" />
                 </filter>
                 <filter id="gold">
                     <feColorMatrix

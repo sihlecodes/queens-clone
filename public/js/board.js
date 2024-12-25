@@ -132,9 +132,10 @@ export class Board {
     }
 
     static to_relative_position(global_x, global_y) {
+        const {TILE_SIZE, RENDER_OFFSET} = Configs;
         return {
-            x: Math.floor((global_x - 5) / Configs.TILE_SIZE),
-            y: Math.floor((global_y - 5) / Configs.TILE_SIZE),
+            x: Math.floor((global_x - RENDER_OFFSET) / TILE_SIZE),
+            y: Math.floor((global_y - RENDER_OFFSET) / TILE_SIZE),
         };
     }
 
@@ -143,9 +144,10 @@ export class Board {
     }
 
     static to_global_position(relative_x, relative_y) {
+        const {TILE_SIZE, RENDER_OFFSET} = Configs;
         return {
-            x: 5 + relative_x * Configs.TILE_SIZE,
-            y: 5 + relative_y * Configs.TILE_SIZE,
+            x: RENDER_OFFSET + relative_x * TILE_SIZE,
+            y: RENDER_OFFSET + relative_y * TILE_SIZE,
         };
     }
 
