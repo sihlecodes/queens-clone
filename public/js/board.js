@@ -1,4 +1,5 @@
 import { QueensValidator } from "./validator.js";
+import { Configs } from "./game.js";
 
 export const Marks = {
     NONE: 0,
@@ -131,9 +132,10 @@ export class Board {
     }
 
     static to_relative_position(global_x, global_y) {
+        const {TILE_SIZE, RENDER_OFFSET} = Configs;
         return {
-            x: Math.floor((global_x - 5) / TILE_SIZE),
-            y: Math.floor((global_y - 5) / TILE_SIZE),
+            x: Math.floor((global_x - RENDER_OFFSET) / TILE_SIZE),
+            y: Math.floor((global_y - RENDER_OFFSET) / TILE_SIZE),
         };
     }
 
@@ -142,9 +144,10 @@ export class Board {
     }
 
     static to_global_position(relative_x, relative_y) {
+        const {TILE_SIZE, RENDER_OFFSET} = Configs;
         return {
-            x: 5 + relative_x * TILE_SIZE,
-            y: 5 + relative_y * TILE_SIZE,
+            x: RENDER_OFFSET + relative_x * TILE_SIZE,
+            y: RENDER_OFFSET + relative_y * TILE_SIZE,
         };
     }
 
@@ -187,14 +190,6 @@ export class Board {
             return Marks.NONE;
 
         return this.marks_grid[y][x];
-    }
-
-    width() {
-        return this.columns() * TILE_SIZE;
-    }
-
-    height() {
-        return this.rows() * TILE_SIZE;
     }
 
     get_color(x, y) {
