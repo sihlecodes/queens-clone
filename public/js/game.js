@@ -1,6 +1,6 @@
 import { Renderer } from './render.js';
-import { Board, Marks, TILE_SIZE } from './board.js';
-import { StateMachine } from './input_handler.js';
+import { Board, Marks } from './board.js';
+import { InputStateHandler } from './input_handler.js';
 import { default_layout } from './assets.js';
 
 export const Configs = {
@@ -10,7 +10,6 @@ export const Configs = {
 
 const Game = {
     start: function () {
-
         const canvas = document.getElementById('svg-canvas');
         const board = new Board(default_layout);
 
@@ -25,7 +24,7 @@ const Game = {
         Configs.TILE_SIZE = (smallest - Configs.RENDER_OFFSET * 2) / board.columns();
 
         const renderer = new Renderer(canvas, board);
-        const state = new StateMachine();
+        const state = new InputStateHandler();
 
         board.handlers.on_remove_queen = function() {
             renderer.clear_invalid_cells();
@@ -79,15 +78,15 @@ const Game = {
                 let event = tr(e);
                 let rect = this.getBoundingClientRect();
 
-                const global = {
+                const global_pos = {
                     x: event.clientX - rect.left,
                     y: event.clientY - rect.top,
                 }
 
-                const relative = board.to_relative_position(global.x, global.y);
-                const mark = board.get_mark(relative.x, relative.y);
+                const relative_pos = board.to_relative_position(global_pos.x, global_pos.y);
+                const mark = board.get_mark(relative_pos.x, relative_pos.y);
 
-                state.handle(name, global, relative, mark);
+                state.handle(name, global_pos, relative_pos, mark);
             });
         }
 

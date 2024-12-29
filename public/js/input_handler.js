@@ -7,10 +7,11 @@ const States = {
     DRAGGING: 4,
 }
 
-export class StateMachine {
+export class InputStateHandler {
     constructor() {
         this.state = States.NOP;
-        this.previous_global = {x: 0, y: 0};
+        this.previous_global_pos = {x: 0, y: 0};
+        this.mouse_moved = false;
 
         this.handlers = {
             on_clear: undefined,
@@ -19,87 +20,102 @@ export class StateMachine {
             on_hover_changing: undefined,
             on_hover_changed: undefined,
         }
-
-        this.start = null;
     }
 
-    handle(name, global, relative, mark) {
+    handle(name, global_pos, relative_pos, mark) {
         switch (name) {
             case 'touchstart':
             case 'mousedown':
-                switch (mark) {
-                    case Marks.NONE:
-                        this.state = States.MARKING;
-                        break;
-                    case Marks.BASIC:
-                        this.state = States.CLEARING;
-                        break;
-                    default:
-                        this.state = States.NOP;
-                        break;
-                }
-
-                this.starting_global = this.previous_global = global;
+                this.handle_mouse_down(global_pos, mark);
                 // console.log('set ' + `(${this.previous_mouse_position.x}, ${this.previous_mouse_position.y})`);
                 break;
 
 
             case 'mousemove':
-                const previous_relative = Board.to_relative_position(this.previous_global.x, this.previous_global.y);
-
-                if (relative.x !== previous_relative.x || relative.y !== previous_relative.y) {
-                    this.handlers.on_hover_changing?.(previous_relative.x, previous_relative.y);
-                    this.handlers.on_hover_changed?.(relative.x, relative.y);
-                }
+                this.handle_hover(relative_pos);
 
             case 'touchmove':
-                if (name === 'touchmove') {
-                    const starting_relative = Board.to_relative_position(this.starting_global.x, this.starting_global.y);
-
-                    switch (this.state) {
-                        case States.CLEARING:
-                            this.handlers.on_clear?.(starting_relative.x, starting_relative.y);
-                            break;
-                        case States.MARKING:
-                            this.handlers.on_mark?.(starting_relative.x, starting_relative.y);
-                            break;
-                    }
-                }
-
-                // console.log('check ' + `(${global.x}, ${global.y})`);
-                if (this.previous_global.x === global.x &&
-                    this.previous_global.y === global.y)
-                    break;
-
-                this.previous_global = global;
-
-                if (mark === Marks.QUEEN)
-                    break;
-
-                switch (this.state) {
-                    case States.CLEARING:
-                        this.handlers.on_clear?.(relative.x, relative.y);
-                        break;
-                    case States.MARKING:
-                        this.handlers.on_mark?.(relative.x, relative.y);
-                        break;
-                }
+                this.handle_mouse_move(name, global_pos, relative_pos, mark);
                 break;
 
             case 'touchend':
             case 'mouseup':
-                this.state = States.NOP;
-
-                if (this.starting_global.x !== global.x &&
-                    this.starting_global.y !== global.y)
-                    break;
-
-                this.handlers.on_toggle?.(relative.x, relative.y);
+                this.handle_mouse_up(relative_pos);
                 break;
 
             case 'mouseleave':
                 this.state = States.NOP;
                 break;
         }
+    }
+
+    get_next_state(mark) {
+        switch (mark) {
+            case Marks.NONE:
+                return States.MARKING;
+
+            case Marks.BASIC:
+                return States.CLEARING;
+
+            default:
+                return States.NOP;
+        }
+    }
+
+    handle_mouse_down(global, mark) {
+        this.state = this.get_next_state(mark);
+        this.previous_global_pos = global;
+        this.mouse_moved = false;
+    }
+
+    handle_hover(relative_pos) {
+        const previous_relative_pos = Board.to_relative_position(
+            this.previous_global_pos.x, this.previous_global_pos.y);
+
+        if (relative_pos.x !== previous_relative_pos.x ||
+            relative_pos.y !== previous_relative_pos.y) {
+                this.handlers.on_hover_changing?.(previous_relative_pos.x,previous_relative_pos.y);
+                this.handlers.on_hover_changed?.(relative_pos.x, relative_pos.y);
+        }
+    }
+
+    handle_drag_action(relative_pos) {
+        switch (this.state) {
+            case States.CLEARING:
+                this.handlers.on_clear?.(relative_pos.x, relative_pos.y);
+                break;
+
+            case States.MARKING:
+                this.handlers.on_mark?.(relative_pos.x, relative_pos.y);
+                break;
+        }
+    }
+
+    handle_mouse_move(name, global_pos, relative_pos, mark) {
+        if (this.previous_global_pos.x === global_pos.x &&
+            this.previous_global_pos.y === global_pos.y && !this.mouse_moved)
+                return;
+
+        if (!this.mouse_moved && name === 'touchmove') {
+            const initial_relative_pos = Board.to_relative_position(
+                this.previous_global_pos.x, this.previous_global_pos.y);
+
+            this.handle_drag_action(initial_relative_pos);
+        }
+
+        this.previous_global_pos = global_pos;
+
+        if (mark === Marks.QUEEN)
+            return;
+
+        this.handle_drag_action(relative_pos);
+        this.mouse_moved = true;
+    }
+
+    handle_mouse_up(relative_pos) {
+        this.state = States.NOP;
+
+        if(!this.mouse_moved)
+            this.handlers.on_toggle?.(relative_pos.x, relative_pos.y);
     }
 }
