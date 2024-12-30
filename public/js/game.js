@@ -10,21 +10,18 @@ export const Configs = {
 
 const Game = {
     start: function () {
-        const canvas = document.getElementById('svg-canvas');
-        const board = new Board(default_layout);
+        this.canvas = document.getElementById('canvas');
+        this.board = new Board(default_layout);
+        this.renderer = new Renderer(this.canvas, this.board);
+        this.input = new InputStateHandler();
 
-        const width = window.innerWidth * .8;
-        const height = window.innerHeight * .8;
+        const canvas = this.canvas;
+        const board = this.board;
+        const renderer = this.renderer;
+        const input = this.input;
 
-        const smallest = Math.min(width, height);
-
-        canvas.setAttribute('width', smallest);
-        canvas.setAttribute('height', smallest);
-
+        const smallest = Math.min(canvas.clientWidth, canvas.clientHeight);
         Configs.TILE_SIZE = (smallest - Configs.RENDER_OFFSET * 2) / board.columns();
-
-        const renderer = new Renderer(canvas, board);
-        const state = new InputStateHandler();
 
         board.handlers.on_remove_queen = function() {
             renderer.clear_invalid_cells();
@@ -47,32 +44,40 @@ const Game = {
             renderer.render_mark(x, y);
         }
 
-        state.handlers.on_hover_changing = function(x, y) {
+        input.handlers.on_hover_changing = function(x, y) {
             renderer.clear_mouse_position(x, y);
         };
 
-        state.handlers.on_hover_changed = function(x, y) {
+        input.handlers.on_hover_changed = function(x, y) {
             renderer.render_mouse_position(x, y);
         };
 
-        state.handlers.on_clear = function(x, y) {
+        input.handlers.on_clear = function(x, y) {
             board.set_mark(x, y, Marks.NONE);
         };
 
-        state.handlers.on_mark = function(x, y) {
+        input.handlers.on_mark = function(x, y) {
             board.set_mark(x, y, Marks.BASIC);
         };
 
-        state.handlers.on_toggle = function(x, y) {
+        input.handlers.on_toggle = function(x, y) {
             board.cycle_mark(x, y);
         };
 
         renderer.render_board();
 
-        this.register_events(board, canvas, state);
+        this.register_mouse_events(board, canvas, input);
+        this.register_button_actions();
     },
 
-    register_events: function(board, element, state) {
+    register_button_actions: function() {
+        const btn_clear = document.getElementById('btn-clear');
+        const btn_new = document.getElementById('btn-new');
+
+        btn_clear.onclick = this.clear;
+    },
+
+    register_mouse_events: function(board, element, input_handler) {
         element.add_event_listener = function(name, tr) {
             this.addEventListener(name, function(e) {
                 let event = tr(e);
@@ -86,7 +91,7 @@ const Game = {
                 const relative_pos = board.to_relative_position(global_pos.x, global_pos.y);
                 const mark = board.get_mark(relative_pos.x, relative_pos.y);
 
-                state.handle(name, global_pos, relative_pos, mark);
+                input_handler.handle(name, global_pos, relative_pos, mark);
             });
         }
 
@@ -101,6 +106,12 @@ const Game = {
         element.add_event_listener('touchmove', first_touch);
         element.add_event_listener('touchend', nop);
     },
+
+    clear: function() {
+        console.log('clear');
+
+        // this.renderer.
+    }
 }
 
 Game.start();

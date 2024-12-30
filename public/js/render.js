@@ -16,10 +16,10 @@ const default_color_map = {
     11: "#d1a3bd",
 };
 
-function drawLine(ctx, startX, startY, endX, endY) {
+function draw_line(ctx, start_x, start_y, end_x, end_y) {
     ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
+    ctx.moveTo(start_x, start_y);
+    ctx.lineTo(end_x, end_y);
     ctx.stroke();
 }
 
@@ -30,6 +30,27 @@ export class Renderer {
         this.color_map = color_map;
         this.invalid_marks = {};
         this.invalid_queens = [];
+
+        this.styles = {
+            outer: {
+                border: {
+                    width: 4,
+                    color: 'black',
+                },
+            },
+
+            inner: {
+                border: {
+                    width: 2.5,
+                    color: 'black',
+                },
+
+                separator: {
+                    width: 1,
+                    color: '#444',
+                },
+            },
+        };
     }
 
     animate_completion() {
@@ -181,15 +202,17 @@ export class Renderer {
     render_board() {
         const { TILE_SIZE } = Configs;
 
-        let board = this.board;
-        let ctx = this.canvas.layer('board');
+        const board = this.board;
+        const ctx = this.canvas.layer('board');
+        const {outer, inner} = this.styles;
+
 
         board.iterate((x, y, color) => {
             const pos = board.to_global_position(x, y);
 
-            ctx.strokeStyle = "gray";
+            ctx.strokeStyle = inner.separator.color;
             ctx.fillStyle = this.color_map[color];
-            ctx.lineWidth = 0.5;
+            ctx.lineWidth = inner.separator.width;
 
             ctx.beginPath();
             ctx.rect(pos.x, pos.y, TILE_SIZE, TILE_SIZE);
@@ -200,42 +223,44 @@ export class Renderer {
         board.iterate((x, y, color) => {
             const pos = board.to_global_position(x, y);
 
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = "black";
+            ctx.lineWidth = outer.border.width;
+            ctx.strokeStyle = outer.border.color;
 
+            // draw outer border
             if (!board.within_bounds(x + 1, y)) {
-                drawLine(ctx,
+                draw_line(ctx,
                     pos.x + TILE_SIZE, pos.y,
                     pos.x + TILE_SIZE, pos.y + TILE_SIZE);
             }
             else if (!board.within_bounds(x - 1, y)) {
-                drawLine(ctx,
+                draw_line(ctx,
                     pos.x, pos.y,
                     pos.x, pos.y + TILE_SIZE);
             }
 
             if (!board.within_bounds(x, y + 1)) {
-                drawLine(ctx,
+                draw_line(ctx,
                     pos.x, pos.y + TILE_SIZE,
                     pos.x + TILE_SIZE, pos.y + TILE_SIZE);
             }
             else if (!board.within_bounds(x, y - 1)) {
-                drawLine(ctx,
+                draw_line(ctx,
                     pos.x, pos.y,
                     pos.x + TILE_SIZE, pos.y);
             }
 
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = "black";
+            ctx.lineWidth = inner.border.width;
+            ctx.strokeStyle = inner.border.color;
 
-            if (color != board.get_color(x + 1, y)) {
-                drawLine(ctx,
+            // draw borders between color regions
+            if (color != board.get_color(x + 1, y) && board.within_bounds(x + 1, y)) {
+                draw_line(ctx,
                     pos.x + TILE_SIZE, pos.y,
                     pos.x + TILE_SIZE, pos.y + TILE_SIZE);
             }
 
-            if (color != board.get_color(x, y + 1)) {
-                drawLine(ctx,
+            if (color != board.get_color(x, y + 1) && board.within_bounds(x, y + 1)) {
+                draw_line(ctx,
                     pos.x, pos.y + TILE_SIZE,
                     pos.x + TILE_SIZE, pos.y + TILE_SIZE);
             }
