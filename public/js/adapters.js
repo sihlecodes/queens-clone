@@ -35,11 +35,11 @@ export class SVGToCanvasContext {
         this.closePath();
     }
 
-    extract(x, y, width, height, tolerance=1) {
+    *extract_all(x, y, width, height, tolerance=1) {
         // extract an area that is slightly larger because
         // the bounds of `getBBox()` are sometimes off by a bit.
-        x -= tolerance/2;
-        y -= tolerance/2;
+        x -= tolerance / 2;
+        y -= tolerance / 2;
         width += tolerance;
         height += tolerance;
 
@@ -49,9 +49,24 @@ export class SVGToCanvasContext {
             if (bounds.x >= x &&
                 bounds.x + bounds.width <= x + width &&
                 bounds.y >= y &&
-                bounds.y + bounds.height <= y + height) {
-                    return child;
-                }
+                bounds.y + bounds.height <= y + height)
+                    yield child;
+        }
+    }
+
+    extract(x, y, width, height, tolerance=1) {
+        const generator = this.extract_all(x, y, width, height, tolerance);
+        return generator.next().value;
+    }
+
+    clearRect(x, y, width, height) {
+        const generator = this.extract_all(x, y, width, height);
+
+        let item = generator.next();
+
+        while (!item.done) {
+            this.remove_child(item.value);
+            item = generator.next();
         }
     }
 
