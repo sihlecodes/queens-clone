@@ -3,6 +3,7 @@ import { Board, Marks } from './board.js';
 import { InputStateHandler } from './input_handler.js';
 import { default_layout } from './assets.js';
 
+// Undefined properties are populated during runtime
 export const Configs = {
     TILE_SIZE: undefined,
     RENDER_OFFSET: 5,

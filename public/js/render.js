@@ -16,6 +16,13 @@ const default_color_map = {
     11: "#d1a3bd",
 };
 
+const Layers = {
+     BOARD: 'board',
+     MARKS: 'marks',
+    ERRORS: 'errors',
+     HOVER: 'hover',
+};
+
 function draw_line(ctx, start_x, start_y, end_x, end_y) {
     ctx.beginPath();
     ctx.moveTo(start_x, start_y);
@@ -54,7 +61,7 @@ export class Renderer {
     }
 
     animate_completion() {
-        const marks_ctx = this.canvas.layer('marks');
+        const marks_ctx = this.canvas.layer(Layers.MARKS);
         let index = 0;
 
         for (const mark of marks_ctx.get_children()) {
@@ -85,7 +92,7 @@ export class Renderer {
             return;
 
         const global = this.board.to_global_position(x, y);
-        const ctx = this.canvas.layer('mouse');
+        const ctx = this.canvas.layer(Layers.HOVER);
 
         ctx.fillStyle = '#5554'
         ctx.fillRect(global.x, global.y, TILE_SIZE, TILE_SIZE);
@@ -98,7 +105,7 @@ export class Renderer {
             return;
 
         const global = this.board.to_global_position(x, y);
-        const ctx = this.canvas.layer('mouse');
+        const ctx = this.canvas.layer(Layers.HOVER);
 
         ctx.clearRect(global.x, global.y, TILE_SIZE, TILE_SIZE);
     }
@@ -106,8 +113,8 @@ export class Renderer {
     render_invalid_cells(cells) {
         const { TILE_SIZE } = Configs;
 
-        const ctx = this.canvas.layer('errors');
-        const marks_ctx = this.canvas.layer('marks');
+        const ctx = this.canvas.layer(Layers.ERRORS);
+        const marks_ctx = this.canvas.layer(Layers.MARKS);
 
         for (const cell of cells) {
             const relative = this.board.from_relative_int(cell);
@@ -138,7 +145,7 @@ export class Renderer {
         const marks = Object.values(this.invalid_marks);
 
         for (const mark of marks)
-            this.canvas.layer('errors').remove_child(mark);
+            this.canvas.layer(Layers.ERRORS).remove_child(mark);
 
         for (const queen of this.invalid_queens)
             queen.setAttribute('filter', 'none');
@@ -151,7 +158,7 @@ export class Renderer {
         const { TILE_SIZE } = Configs;
 
         const board = this.board;
-        const ctx = this.canvas.layer('marks');
+        const ctx = this.canvas.layer(Layers.MARKS);
 
         const mark = board.get_mark(x, y);
         const pos = board.to_global_position(x, y);
@@ -203,7 +210,7 @@ export class Renderer {
         const { TILE_SIZE } = Configs;
 
         const board = this.board;
-        const ctx = this.canvas.layer('board');
+        const ctx = this.canvas.layer(Layers.BOARD);
         const {outer, inner} = this.styles;
 
 
