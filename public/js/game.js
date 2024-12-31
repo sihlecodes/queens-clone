@@ -23,15 +23,15 @@ const Game = {
         const smallest = Math.min(canvas.clientWidth, canvas.clientHeight);
         Configs.TILE_SIZE = (smallest - Configs.RENDER_OFFSET * 2) / board.columns();
 
-        board.handlers.on_remove_queen = function() {
+        board.handlers.on_remove_queen = () => {
             renderer.clear_invalid_cells();
         };
 
-        board.handlers.on_invalid_queens = function(cells) {
+        board.handlers.on_invalid_queens = (cells) => {
             renderer.render_invalid_cells(cells);
         };
 
-        board.handlers.on_valid_queens = function(num_queens) {
+        board.handlers.on_valid_queens = (num_queens) => {
             const win_condition = Math.min(board.columns(), board.rows());
 
             if (num_queens === win_condition) {
@@ -40,27 +40,27 @@ const Game = {
             }
         };
 
-        board.handlers.on_mark_applied = function(x, y) {
+        board.handlers.on_mark_applied = (x, y) => {
             renderer.render_mark(x, y);
         }
 
-        input.handlers.on_hover_changing = function(x, y) {
+        input.handlers.on_hover_changing = (x, y) => {
             renderer.clear_mouse_position(x, y);
         };
 
-        input.handlers.on_hover_changed = function(x, y) {
+        input.handlers.on_hover_changed = (x, y) => {
             renderer.render_mouse_position(x, y);
         };
 
-        input.handlers.on_clear = function(x, y) {
+        input.handlers.on_clear = (x, y) => {
             board.set_mark(x, y, Marks.NONE);
         };
 
-        input.handlers.on_mark = function(x, y) {
+        input.handlers.on_mark = (x, y) => {
             board.set_mark(x, y, Marks.BASIC);
         };
 
-        input.handlers.on_toggle = function(x, y) {
+        input.handlers.on_toggle = (x, y) => {
             board.cycle_mark(x, y);
         };
 
@@ -74,7 +74,7 @@ const Game = {
         const btn_clear = document.getElementById('btn-clear');
         const btn_new = document.getElementById('btn-new');
 
-        btn_clear.onclick = this.clear;
+        btn_clear.onclick = () => this.clear();
     },
 
     register_mouse_events: function(board, element, input_handler) {
