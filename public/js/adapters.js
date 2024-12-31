@@ -43,7 +43,9 @@ export class SVGToCanvasContext {
         width += tolerance;
         height += tolerance;
 
-        for (const child of this.get_children()) {
+        const children = Array.from(this.get_children());
+
+        for (const child of children) {
             const bounds = child.getBBox();
 
             if (bounds.x >= x &&
@@ -68,13 +70,6 @@ export class SVGToCanvasContext {
             this.remove_child(item.value);
             item = generator.next();
         }
-    }
-
-    clearRect(x, y, width, height) {
-        const child = this.extract(x, y, width, height);
-
-        if (child)
-            return this.remove_child(child);
     }
 
     closePath() {
