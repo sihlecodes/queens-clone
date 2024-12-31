@@ -8,8 +8,8 @@ export const Configs = {
     RENDER_OFFSET: 5,
 }
 
-const Game = {
-    start: function () {
+class Game {
+    start() {
         this.canvas = document.getElementById('canvas');
         this.board = new Board(default_layout);
         this.renderer = new Renderer(this.canvas, this.board);
@@ -68,16 +68,16 @@ const Game = {
 
         this.register_mouse_events(board, canvas, input);
         this.register_button_actions();
-    },
+    }
 
-    register_button_actions: function() {
+    register_button_actions() {
         const btn_clear = document.getElementById('btn-clear');
         const btn_new = document.getElementById('btn-new');
 
         btn_clear.onclick = () => this.clear();
-    },
+    }
 
-    register_mouse_events: function(board, element, input_handler) {
+    register_mouse_events(board, element, input_handler) {
         element.add_event_listener = function(name, tr) {
             this.addEventListener(name, function(e) {
                 let event = tr(e);
@@ -105,13 +105,13 @@ const Game = {
         element.add_event_listener('touchstart', first_touch);
         element.add_event_listener('touchmove', first_touch);
         element.add_event_listener('touchend', nop);
-    },
+    }
 
-    clear: function() {
+    clear() {
         console.log('clear');
 
         // this.renderer.
     }
 }
 
-Game.start();
+new Game().start();
