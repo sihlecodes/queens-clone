@@ -45,6 +45,7 @@ class Game {
             if (num_queens === win_condition) {
                 console.log('you win!');
                 renderer.animate_completion();
+                input.disable();
             }
         };
 

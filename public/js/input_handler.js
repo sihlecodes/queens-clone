@@ -12,6 +12,8 @@ export class InputStateHandler {
         this.state = States.NOP;
         this.previous_global_pos = {x: 0, y: 0};
         this.mouse_moved = false;
+        this.first_click = false;
+        this.disabled = false;
 
         this.handlers = {
             on_clear: undefined,
@@ -22,7 +24,13 @@ export class InputStateHandler {
         }
     }
 
+     enable() { this.disabled = false; }
+    disable() { this.disabled = true; }
+
     handle(name, global_pos, relative_pos, mark) {
+        if (this.disabled)
+            return;
+
         switch (name) {
             case 'touchstart':
             case 'mousedown':
