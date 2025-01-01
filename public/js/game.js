@@ -7,6 +7,10 @@ import { default_layout } from './assets.js';
 export const Configs = {
     TILE_SIZE: undefined,
     RENDER_OFFSET: 5,
+    canvas: {
+        width: undefined,
+        height: undefined,
+    },
 }
 
 class Game {
@@ -20,6 +24,9 @@ class Game {
         const board = this.board;
         const renderer = this.renderer;
         const input = this.input;
+
+        Configs.canvas.width = canvas.clientWidth;
+        Configs.canvas.height = canvas.clientHeight;
 
         const smallest = Math.min(canvas.clientWidth, canvas.clientHeight);
         Configs.TILE_SIZE = (smallest - Configs.RENDER_OFFSET * 2) / board.columns();
@@ -108,10 +115,11 @@ class Game {
         element.add_event_listener('touchend', nop);
     }
 
-    clear() {
-        console.log('clear');
 
-        // this.renderer.
+    clear() {
+        this.board.clear();
+        this.renderer.clear();
+        this.input.enable();
     }
 }
 

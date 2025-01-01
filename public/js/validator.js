@@ -15,6 +15,8 @@ export class QueensValidator {
         };
     }
 
+    clear() { this.queens.clear(); }
+
     get_nearby_queen_positions(queens, x, y) {
         const coords = [{x, y}];
 

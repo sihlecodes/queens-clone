@@ -14,8 +14,7 @@ export class Board {
     constructor(layout) {
         this.queens = new QueensValidator();
         this.layout = layout;
-        this.marks_grid = [];
-        this.initialize_marks_grid();
+        this.clear();
 
         this.handlers = {
             on_mark_applied: undefined,
@@ -48,6 +47,12 @@ export class Board {
         this.queens.handlers.on_invalid_row = (row) => {
             this.handlers.on_invalid_queens?.(this.get_cells_by_row(row));
         };
+    }
+
+    clear() {
+        this.queens.clear();
+        this.marks_grid = [];
+        this.initialize_marks_grid();
     }
 
     initialize_marks_grid() {

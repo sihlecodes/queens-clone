@@ -60,6 +60,12 @@ export class Renderer {
         };
     }
 
+    clear() {
+        this.canvas.layer(Layers.MARKS).clearRect(0, 0, Configs.canvas.width, Configs.canvas.height);
+        this.canvas.layer(Layers.ERRORS).clearRect(0, 0, Configs.canvas.width, Configs.canvas.height);
+        // this.canvas.layer(Layers.BOARD).clearRect(0, 0, Configs.canvas.width, Configs.canvas.height);
+    }
+
     animate_completion() {
         const marks_ctx = this.canvas.layer(Layers.MARKS);
         let index = 0;
