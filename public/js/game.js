@@ -20,6 +20,9 @@ class Game {
         this.renderer = new Renderer(this.canvas, this.board);
         this.input = new InputStateHandler();
 
+        this.time = 0;
+        this.timer = undefined;
+
         const canvas = this.canvas;
         const board = this.board;
         const renderer = this.renderer;
@@ -43,6 +46,8 @@ class Game {
             const win_condition = Math.min(board.columns(), board.rows());
 
             if (num_queens === win_condition) {
+                clearInterval(this.timer);
+
                 console.log('you win!');
                 renderer.animate_completion();
                 input.disable();
@@ -51,6 +56,10 @@ class Game {
 
         board.handlers.on_mark_applied = (x, y) => {
             renderer.render_mark(x, y);
+        }
+
+        input.handlers.on_first_click = () => {
+            this.timer = setInterval(() => this.update_elapsed_time(), 1000);
         }
 
         input.handlers.on_hover_changing = (x, y) => {
@@ -116,6 +125,15 @@ class Game {
         element.add_event_listener('touchend', nop);
     }
 
+    update_elapsed_time() {
+        this.time++;
+
+        const mins = Math.floor(this.time / 60);
+        const secs = this.time % 60;
+
+        const time = document.getElementById('time');
+        time.innerText = `${mins}:${String(secs).padStart(2, '0')}`;
+    }
 
     clear() {
         this.board.clear();

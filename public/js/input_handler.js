@@ -21,6 +21,7 @@ export class InputStateHandler {
             on_toggle: undefined,
             on_hover_changing: undefined,
             on_hover_changed: undefined,
+            on_first_click: undefined,
         }
     }
 
@@ -71,6 +72,11 @@ export class InputStateHandler {
     }
 
     handle_mouse_down(global, mark) {
+        if (!this.first_click) {
+            this.handlers.on_first_click?.();
+            this.first_click = true;
+        }
+
         this.state = this.get_next_state(mark);
         this.previous_global_pos = global;
         this.mouse_moved = false;
