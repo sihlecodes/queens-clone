@@ -19,9 +19,9 @@ class Game {
         this.board = new Board(default_layout);
         this.renderer = new Renderer(this.canvas, this.board);
         this.input = new InputStateHandler();
-
         this.time = 0;
         this.timer = undefined;
+        this.completed = false;
 
         const canvas = this.canvas;
         const board = this.board;
@@ -49,6 +49,7 @@ class Game {
                 clearInterval(this.timer);
 
                 console.log('you win!');
+                this.completed = true;
                 renderer.animate_completion();
                 input.disable();
             }
@@ -59,7 +60,10 @@ class Game {
         }
 
         input.handlers.on_first_click = () => {
-            this.timer = setInterval(() => this.update_elapsed_time(), 1000);
+            this.timer = setInterval(() => {
+                this.time++;
+                this.update_elapsed_time()
+            }, 1000);
         }
 
         input.handlers.on_hover_changing = (x, y) => {
@@ -126,8 +130,6 @@ class Game {
     }
 
     update_elapsed_time() {
-        this.time++;
-
         const mins = Math.floor(this.time / 60);
         const secs = this.time % 60;
 
@@ -139,6 +141,18 @@ class Game {
         this.board.clear();
         this.renderer.clear();
         this.input.enable();
+
+        if (this.completed)
+            this.reset();
+    }
+
+    reset() {
+        this.time = 0;
+        this.update_elapsed_time(); // set the ui to 0:00
+
+        this.completed = false;
+        this.timer = undefined;
+        this.input.reset();
     }
 }
 

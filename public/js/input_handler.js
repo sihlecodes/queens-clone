@@ -9,11 +9,7 @@ const States = {
 
 export class InputStateHandler {
     constructor() {
-        this.state = States.NOP;
-        this.previous_global_pos = {x: 0, y: 0};
-        this.mouse_moved = false;
-        this.first_click = false;
-        this.disabled = false;
+        this.reset();
 
         this.handlers = {
             on_clear: undefined,
@@ -23,6 +19,14 @@ export class InputStateHandler {
             on_hover_changed: undefined,
             on_first_click: undefined,
         }
+    }
+
+    reset() {
+        this.state = States.NOP;
+        this.previous_global_pos = {x: 0, y: 0};
+        this.mouse_moved = false;
+        this.first_click = false;
+        this.disabled = false;
     }
 
      enable() { this.disabled = false; }
