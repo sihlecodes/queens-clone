@@ -21,16 +21,15 @@
             }
 
             #banner {
-
+                display: flex;
                 flex-direction: column;
-                height: 100vh;
+                min-height: 100vh;
                 padding: 0 var(--padding);
                 padding-top: var(--padding);
                 background-color: var(--color-banner-background);
             }
 
             #time-container {
-                /*background-color: red;*/
                 text-align: center;
                 margin-bottom: 5px;
                 font-size: large;
@@ -40,7 +39,6 @@
             #canvas {
                 width: 100%;
                 aspect-ratio: 1;
-                /*border: 1px solid #000000;*/
                 touch-action: none;
             }
 
@@ -50,6 +48,7 @@
             }
 
             #controls button {
+                color: var(--color-text);
                 margin-right: var(--spacing);
             }
 
@@ -174,7 +173,6 @@
                         <path d="M0,0 L0,20" style="stroke:black; stroke-width:6"/>
                     </pattern>
                 </defs>
-                <g id="board"></g>
             </svg>
             <div id="controls">
                 <button id="btn-new" class="disabled">New game</button>
