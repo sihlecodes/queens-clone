@@ -25,7 +25,7 @@ export class InputStateHandler {
         this.state = States.NOP;
         this.previous_global_pos = {x: 0, y: 0};
         this.mouse_moved = false;
-        this.first_click = false;
+        this.is_first_click = true;
         this.disabled = false;
     }
 
@@ -38,11 +38,12 @@ export class InputStateHandler {
 
         switch (name) {
             case 'touchstart':
+                console.log('touchstart')
+
             case 'mousedown':
                 this.handle_mouse_down(global_pos, mark);
                 // console.log('set ' + `(${this.previous_mouse_position.x}, ${this.previous_mouse_position.y})`);
                 break;
-
 
             case 'mousemove':
                 this.handle_hover(relative_pos);
@@ -52,6 +53,8 @@ export class InputStateHandler {
                 break;
 
             case 'touchend':
+                console.log('touchend');
+
             case 'mouseup':
                 this.handle_mouse_up(relative_pos);
                 break;
@@ -77,9 +80,9 @@ export class InputStateHandler {
     }
 
     handle_mouse_down(global, mark) {
-        if (!this.first_click) {
+        if (this.is_first_click) {
             this.handlers.on_first_click?.();
-            this.first_click = true;
+            this.is_first_click = false;
         }
 
         this.state = this.get_next_state(mark);
