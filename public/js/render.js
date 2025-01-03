@@ -164,6 +164,8 @@ export class Renderer {
 
         ctx.clearRect(pos.x, pos.y, TILE_SIZE, TILE_SIZE);
 
+        let width, height;
+
         switch (mark) {
             case Marks.NONE:
                 return;
@@ -172,8 +174,8 @@ export class Renderer {
                 ctx.fillStyle = "black";
                 ctx.lineWidth = 1;
 
-                var width = TILE_SIZE / 5;
-                var height = TILE_SIZE / 5;
+                width = TILE_SIZE * .15;
+                height = width;
 
                 const left_x = pos.x + (TILE_SIZE - width) / 2;
                 const top_y = pos.y + (TILE_SIZE - height) / 2;
@@ -186,18 +188,20 @@ export class Renderer {
 
                 ctx.moveTo(right_x, top_y);
                 ctx.lineTo(left_x, bottom_y);
+
                 const annotation = ctx.stroke();
                 annotation.type = Marks.BASIC;
                 break;
 
             case Marks.QUEEN:
-                var width = TILE_SIZE / 2;
-                var height = TILE_SIZE / 2;
+                width = TILE_SIZE * .4;
+                height = width;
 
-                const queen = ctx.drawImageFromSource('./images/Queen.svg',
-                    pos.x + (TILE_SIZE - width) / 2,
-                    pos.y + (TILE_SIZE - height) / 2,
-                    width, height);
+                const x = pos.x + (TILE_SIZE - width) / 2;
+                const y = pos.y + (TILE_SIZE - height) / 2;
+
+                const queen = ctx.drawImageFromSource(
+                    './images/Queen.svg', x, y, width, height);
 
                 queen.type = Marks.QUEEN;
                 break;
