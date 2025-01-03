@@ -127,8 +127,8 @@ export class Renderer {
             const relative = this.board.from_relative_int(cell);
             const global = this.board.to_global_position(relative.x, relative.y);
 
-            ctx.filter = 'url(#invalid_color)';
-            ctx.fillStyle = 'url(#invalid_marks)';
+            ctx.filter = 'url(#invalid_mark_filter)';
+            ctx.fillStyle = 'url(#invalid_mark_pattern)';
 
             const mark = this.board.get_mark(relative.x, relative.y);
 
@@ -136,7 +136,7 @@ export class Renderer {
                 const queen = marks_ctx.extract(global.x, global.y, TILE_SIZE, TILE_SIZE);
 
                 if (queen) {
-                    queen.setAttribute('filter', 'url(#invalid_color');
+                    queen.setAttribute('filter', 'url(#invalid_queen_filter');
                     this.invalid_queens.push(queen);
                 }
             }
