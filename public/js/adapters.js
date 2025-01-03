@@ -72,6 +72,26 @@ export class SVGToCanvasContext {
         }
     }
 
+    style(element, excluded = []) {
+        const fields = new Map([
+            ['stroke-width', 'lineWidth'],
+            ['filter', 'filter'],
+            ['stroke', 'strokeStyle'],
+            ['fill', 'fillStyle'],
+        ]);
+
+        if (this.filter === 'none')
+            excluded.push('filter');
+
+        if (this.lineWidth <= 0)
+            excluded.push('lineWidth');
+
+        for (const [svg_field, ctx_field] of fields) {
+            if (!excluded.includes(svg_field) && !excluded.includes(ctx_field))
+                element.setAttribute(svg_field, this[ctx_field]);
+        }
+    }
+
     closePath() {
         this.path.push('Z');
     }
@@ -83,9 +103,8 @@ export class SVGToCanvasContext {
         rect.setAttribute('y', y);
         rect.setAttribute('width', width);
         rect.setAttribute('height', height);
-        rect.setAttribute('fill', this.fillStyle);
-        rect.setAttribute('filter', this.filter);
-        rect.setAttribute('stroke-width', 0);
+
+        this.style(rect, ['strokeStyle', 'lineWidth']);
 
         return this.append_child(rect);
     }
@@ -96,7 +115,9 @@ export class SVGToCanvasContext {
         image.setAttribute('href', href);
         image.setAttribute('x', x);
         image.setAttribute('y', y);
-        image.setAttribute('filter', this.filter);
+
+        this.style(image, ['fillStyle', 'strokeStyle', 'lineWidth']);
+
         image.setAttribute('width', width);
         image.setAttribute('height', height);
 
@@ -118,11 +139,8 @@ export class SVGToCanvasContext {
     stroke() {
         const path = this.create_element('path');
 
-        path.setAttribute('d', this.path.join(','));
-        path.setAttribute('stroke', this.strokeStyle);
-        path.setAttribute('fill', this.fillStyle);
-        path.setAttribute('filter', this.filter);
-        path.setAttribute('stroke-width', this.lineWidth);
+        path.setAttribute('d', this.path.join(' '));
+        this.style(path);
 
         return this.append_child(path);
     }
@@ -137,10 +155,14 @@ export class LayeredSVGToCanvasContext extends SVGToCanvasContext {
 
     layer(name) {
         if (!(name in this.layers)) {
-            const group = this.create_element('g');
-            group.setAttribute('id', name);
+            let group = document.querySelector(`svg g#${name}`);
 
-            this.append_child(group);
+            if (group === null) {
+                group = this.create_element('g');
+                group.setAttribute('id', name);
+                this.append_child(group);
+            }
+
             this.layers[name] = new LayeredSVGToCanvasContext(group, name, this.layers);
         }
 
