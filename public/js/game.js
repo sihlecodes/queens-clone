@@ -95,6 +95,8 @@ class Game {
     register_mouse_events(board, element, input_handler) {
         element.add_event_listener = function(name, tr) {
             this.addEventListener(name, function(e) {
+                e.preventDefault();
+
                 let event = tr(e);
                 let rect = this.getBoundingClientRect();
 
