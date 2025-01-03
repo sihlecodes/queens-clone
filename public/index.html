@@ -12,6 +12,7 @@
                 --spacing: 15px;
                 --padding: var(--spacing);
                 --padding-extra: 20px;
+                --paragraph-spacing: 10px;
 
                 color: var(--color-text);
                 margin: 0;
@@ -20,7 +21,17 @@
                 font-family: sans-serif;
             }
 
-            #banner {
+            img.queen {
+                width: 16px;
+                aspect-ratio: 1;
+            }
+
+            img.clock {
+                width: 15px;
+                margin-right: calc(var(--spacing) / 3);
+            }
+
+            .banner {
                 display: flex;
                 flex-direction: column;
                 min-height: 100vh;
@@ -29,9 +40,9 @@
                 background-color: var(--color-banner-background);
             }
 
-            #time-container {
+            .time-container {
                 text-align: center;
-                margin-bottom: 5px;
+                margin-bottom: var(--spacing);
                 font-size: large;
                 font-weight: 600;
             }
@@ -42,21 +53,13 @@
                 touch-action: none;
             }
 
-            #controls {
+            .controls {
                 display: flex;
                 margin-top: var(--spacing);
             }
 
-            #controls button {
+            .controls button {
                 color: var(--color-text);
-                margin-right: var(--spacing);
-            }
-
-            #controls button:last-child {
-                margin-right: 0;
-            }
-
-            #controls button {
                 flex: 1;
                 font-size: 12pt;
                 font-weight: bold;
@@ -67,45 +70,56 @@
                 outline: none;
                 padding: 7px;
                 cursor: pointer;
+                transition: border-width margin 0.5s ease-out;
+                box-sizing: border-box;
+                margin: 1px;
+                margin-right: var(--spacing);
             }
 
-            #controls button:hover {
+            .controls button:hover {
                 border-width: 2px;
+                margin: 0px;
+                margin-right: var(--spacing);
             }
 
-            #controls button.disabled {
+            .controls button:last-child {
+                margin-right: 0;
+            }
+
+            .controls button.disabled {
                 background-color: lightgray;
                 color: gray;
                 border: none;
                 cursor: not-allowed;
             }
 
-            #instructions {
+            .text-block {
                 font-size: smaller;
                 margin: var(--spacing) 0;
-                padding: var(--padding) var(--padding-extra);
+                padding: var(--padding-extra) var(--padding);
                 padding-bottom: var(--padding-extra);
                 border: 1px solid var(--color-border);
                 border-radius: 2px;
             }
 
-            #instructions ol { padding-left: inherit; margin: 0 }
-            #instructions li { margin-top: var(--spacing); }
+            .text-block ol { padding-left: inherit; margin: 0 }
+            .text-block li { margin-top: var(--paragraph-spacing); }
 
-            img {
-                width: 16px;
-                aspect-ratio: 1;
+            .instructions { margin-bottom: 0;}
+
+            .examples-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: var(--spacing);
+                margin-top: var(--spacing);
             }
 
-            img.clock {
-                width: 15px;
-                margin-right: calc(var(--spacing) / 3);
-            }
+            .examples-grid .card p { margin: var(--paragraph-spacing) 0 0 0; }
 
             .animate { animation: pulse 1s; }
 
             @media (min-width: 400px) {
-                #banner {
+                .banner {
                     width: 400px;
                     margin: auto;
                 }
@@ -146,8 +160,9 @@
         </style>
     </head>
     <body>
-        <div id="banner">
-            <div id="time-container"><img class="clock" src="./images/clock.svg" /><span id="time">0:00</span></div>
+        <div class="banner">
+            <div class="time-container"><img class="clock" src="./images/clock.svg" /><span id="time">0:00</span></div>
+
             <svg id="canvas">
                 <defs>
                     <filter id="invalid_color">
@@ -174,18 +189,41 @@
                     </pattern>
                 </defs>
             </svg>
-            <div id="controls">
+
+            <div class="controls">
                 <button id="btn-new" class="disabled">New game</button>
                 <button id="btn-clear">Clear</button>
             </div>
 
-            <div id="instructions">
+            <div class="instructions text-block">
                 <b>How to play</b>
                 <ol>
-                    <li>Your goal is to have <b>exactly one <img src="./images/Queen.svg"/></b> in each <b>row, column, and color region.</b></li>
-                    <li>Tap once to place X and tap twice for <img src="./images/Queen.svg"/></b>. Use X to mark where <img src="./images/Queen.svg"/></b> cannot be placed.</li>
-                    <li>Two <img src="./images/Queen.svg"/></b> cannot touch each other, not even diagonally.</li>
+                    <li>Your goal is to have <b>exactly one <img class="queen" src="./images/Queen.svg"/></b> in each <b>row, column, and color region.</b></li>
+                    <li>Tap once to place X and tap twice for <img class="queen" src="./images/Queen.svg"/></b>. Use X to mark where <img class="queen" src="./images/Queen.svg"/></b> cannot be placed.</li>
+                    <li>Two <img class="queen" src="./images/Queen.svg"/></b> cannot touch each other, not even diagonally.</li>
                 </ol>
+            </div>
+
+            <div class="examples text-block">
+                <b>Examples</b>
+                <div class="examples-grid">
+                    <div class="card">
+                        <img src="./images/example_01.svg" />
+                        <p>Each row can only have one <img class="queen" src="./images/Queen.svg"/>.</p>
+                    </div>
+                    <div class="card">
+                        <img src="./images/example_02.svg" />
+                        <p>Each column can also only have one <img class="queen" src="./images/Queen.svg"/>.</p>
+                    </div>
+                    <div class="card">
+                        <img src="./images/example_03.svg" />
+                        <p>Each color region can also only have one <img class="queen" src="./images/Queen.svg"/>.</p>
+                    </div>
+                    <div class="card">
+                        <img src="./images/example_04.svg" />
+                        <p>Two <img class="queen" src="./images/Queen.svg"/> cannot touch each other, not even diagonally.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
