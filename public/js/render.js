@@ -16,11 +16,14 @@ const default_color_map = {
     11: "#d1a3bd",
 };
 
+// as a rather useful side effect
+// this also dictates drawing order of layers
 const Layers = {
-     BOARD: 'board',
-     MARKS: 'marks',
-    ERRORS: 'errors',
-     HOVER: 'hover',
+    BOARD: 'board',
+   ERRORS: 'errors',
+ OUTLINES: 'outlines',
+    MARKS: 'marks',
+    HOVER: 'hover',
 };
 
 function draw_line(ctx, start_x, start_y, end_x, end_y) {
@@ -33,6 +36,11 @@ function draw_line(ctx, start_x, start_y, end_x, end_y) {
 export class Renderer {
     constructor(canvas, board, color_map = default_color_map) {
         this.canvas = new LayeredSVGToCanvasContext(canvas);
+
+        // create layers upfront (sets the draw order)
+        for (const layer of Object.values(Layers))
+            this.canvas.layer(layer);
+
         this.board = board;
         this.color_map = color_map;
         this.invalid_marks = {};
@@ -213,9 +221,9 @@ export class Renderer {
         const { TILE_SIZE } = Configs;
 
         const board = this.board;
-        const ctx = this.canvas.layer(Layers.BOARD);
         const {outer, inner} = this.styles;
 
+        let ctx = this.canvas.layer(Layers.BOARD);
 
         board.iterate((x, y, color) => {
             const pos = board.to_global_position(x, y);
@@ -226,9 +234,10 @@ export class Renderer {
 
             ctx.beginPath();
             ctx.rect(pos.x, pos.y, TILE_SIZE, TILE_SIZE);
-            ctx.fillRect(pos.x, pos.y, TILE_SIZE, TILE_SIZE);
             ctx.stroke();
         });
+
+        ctx = ctx.layer(Layers.OUTLINES);
 
         board.iterate((x, y, color) => {
             const pos = board.to_global_position(x, y);
