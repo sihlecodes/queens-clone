@@ -1,38 +1,29 @@
 import { Renderer } from './render.js';
 import { Board, Marks } from './board.js';
 import { InputStateHandler } from './input_handler.js';
-import { default_layout } from './assets.js';
+import { Configuaration } from './configure.js';
 
 // Undefined properties are populated during runtime
-export const Configs = {
+export const Global = {
     TILE_SIZE: undefined,
-    RENDER_OFFSET: 5,
-    canvas: {
-        width: undefined,
-        height: undefined,
-    },
-}
+    ...Configuaration,
+};
 
 class Game {
     start() {
         this.canvas = document.getElementById('canvas');
-        this.board = new Board(default_layout);
-        this.renderer = new Renderer(this.canvas, this.board);
+
+        const width = this.canvas.clientWidth;
+        const height = this.canvas.clientHeight;
+
+        this.board = new Board(Global.map);
+        this.renderer = new Renderer(this.canvas, this.board, width, height);
         this.input = new InputStateHandler();
-        this.time = 0;
-        this.timer = undefined;
-        this.completed = false;
+        this.reset();
 
-        const canvas = this.canvas;
-        const board = this.board;
-        const renderer = this.renderer;
-        const input = this.input;
+        const { canvas, board, renderer, input } = this;
 
-        Configs.canvas.width = canvas.clientWidth;
-        Configs.canvas.height = canvas.clientHeight;
-
-        const smallest = Math.min(canvas.clientWidth, canvas.clientHeight);
-        Configs.TILE_SIZE = (smallest - Configs.RENDER_OFFSET * 2) / board.columns();
+        Global.TILE_SIZE = (Math.min(width, height) - Global.RENDER_OFFSET * 2) / board.columns();
 
         board.handlers.on_remove_queen = () => {
             renderer.clear_invalid_cells();

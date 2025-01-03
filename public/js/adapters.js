@@ -4,7 +4,7 @@ export class SVGToCanvasContext {
         this.path = [];
 
         this.strokeStyle = 'black';
-        this.fillStyle = 'black';
+        this.fillStyle = 'none';
         this.filter = 'none';
         this.lineWidth = 0;
     }
@@ -141,6 +141,7 @@ export class SVGToCanvasContext {
 
         path.setAttribute('d', this.path.join(' '));
         this.style(path);
+        this.path = [];
 
         return this.append_child(path);
     }

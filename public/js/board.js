@@ -1,14 +1,11 @@
-import { QueensValidator } from "./validator.js";
-import { Configs } from "./game.js";
+import { QueensValidator } from './validator.js';
+import { Global } from './game.js';
 
 export const Marks = {
     NONE: 0,
     BASIC: 1,
     QUEEN: 2,
 };
-
-
-export const TILE_SIZE = 48;
 
 export class Board {
     constructor(layout) {
@@ -137,7 +134,8 @@ export class Board {
     }
 
     static to_relative_position(global_x, global_y) {
-        const {TILE_SIZE, RENDER_OFFSET} = Configs;
+        const {TILE_SIZE, RENDER_OFFSET} = Global;
+
         return {
             x: Math.floor((global_x - RENDER_OFFSET) / TILE_SIZE),
             y: Math.floor((global_y - RENDER_OFFSET) / TILE_SIZE),
@@ -149,7 +147,8 @@ export class Board {
     }
 
     static to_global_position(relative_x, relative_y) {
-        const {TILE_SIZE, RENDER_OFFSET} = Configs;
+        const {TILE_SIZE, RENDER_OFFSET} = Global;
+
         return {
             x: RENDER_OFFSET + relative_x * TILE_SIZE,
             y: RENDER_OFFSET + relative_y * TILE_SIZE,

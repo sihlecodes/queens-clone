@@ -1,4 +1,4 @@
-import { QueenCollection } from "./collections.js";
+import { QueenCollection } from './collections.js';
 
 export class QueensValidator {
     constructor() {
