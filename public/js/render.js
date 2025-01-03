@@ -35,11 +35,12 @@ export class Renderer {
     }
 
     clear_meta_invalid() {
-        this.invalid_marks = {};
+        this.invalid_marks = [];
         this.invalid_queens = [];
     }
 
     clear() {
+        this.clear_meta_invalid();
         this.canvas.layer(Layers.MARKS).clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.canvas.layer(Layers.ERRORS).clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
@@ -112,18 +113,15 @@ export class Renderer {
                 }
             }
 
-            if (!(cell in this.invalid_marks)) {
-                const invalid_mark = ctx.fillRect(global.x, global.y, TILE_SIZE, TILE_SIZE);
-                this.invalid_marks[cell] = invalid_mark;
+            if (!this.invalid_marks.includes(cell)) {
+                ctx.fillRect(global.x, global.y, TILE_SIZE, TILE_SIZE);
+                this.invalid_marks.push(cell);
             }
         }
     }
 
     clear_invalid_cells() {
-        const marks = Object.values(this.invalid_marks);
-
-        for (const mark of marks)
-            this.canvas.layer(Layers.ERRORS).remove_child(mark);
+        this.canvas.layer(Layers.ERRORS).clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         for (const queen of this.invalid_queens)
             queen.setAttribute('filter', 'none');
