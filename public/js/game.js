@@ -47,11 +47,13 @@ class Game {
 
             if (num_queens === win_condition) {
                 clearInterval(this.timer);
-
-                console.log('you win!');
                 this.completed = true;
+
+                renderer.clear_mouse_position();
                 renderer.animate_completion();
                 input.disable();
+
+                console.log('you win!');
             }
         };
 
@@ -66,8 +68,8 @@ class Game {
             }, 1000);
         }
 
-        input.handlers.on_hover_changing = (x, y) => {
-            renderer.clear_mouse_position(x, y);
+        input.handlers.on_hover_changing = () => {
+            renderer.clear_mouse_position();
         };
 
         input.handlers.on_hover_changed = (x, y) => {

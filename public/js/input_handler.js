@@ -58,6 +58,7 @@ export class InputStateHandler {
 
             case 'mouseleave':
                 this.state = States.NOP;
+                this.handle_hover(relative_pos);
                 break;
         }
     }

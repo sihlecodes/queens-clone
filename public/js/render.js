@@ -104,16 +104,9 @@ export class Renderer {
         ctx.fillRect(global.x, global.y, TILE_SIZE, TILE_SIZE);
     }
 
-    clear_mouse_position(x, y) {
-        const { TILE_SIZE } = Configs;
-
-        if (!this.board.within_bounds(x, y))
-            return;
-
-        const global = this.board.to_global_position(x, y);
+    clear_mouse_position() {
         const ctx = this.canvas.layer(Layers.HOVER);
-
-        ctx.clearRect(global.x, global.y, TILE_SIZE, TILE_SIZE);
+        ctx.clearRect(0, 0, Configs.canvas.width, Configs.canvas.height);
     }
 
     render_invalid_cells(cells) {
