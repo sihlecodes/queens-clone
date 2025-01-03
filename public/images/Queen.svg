@@ -1,15 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 89.96">
-  <defs>
-    <style>
-      .cls-1 {
-        stroke-width: 0px;
-      }
-    </style>
-  </defs>
-  <rect class="cls-1" x="15" y="82.16" width="70" height="7.8" rx="3.9" ry="3.9"/>
-  <circle class="cls-1" cx="50" cy="5" r="5"/>
-  <polygon class="cls-1" points="66 54 50 6 34 54 5 29 18 78 49 78 51 78 82 78 95 29 66 54"/>
-  <circle class="cls-1" cx="95" cy="28" r="5"/>
-  <circle class="cls-1" cx="5" cy="28" r="5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 89.96">
+  <rect x="15" y="82.16" width="70" height="7.8" rx="3.9" ry="3.9"/>
+  <circle cx="50" cy="5" r="5"/>
+  <path d="M66 54 50 6 34 54 5 29l13 49h64l13-49-29 25z"/>
+  <circle cx="95" cy="28" r="5"/>
+  <circle cx="5" cy="28" r="5"/>
 </svg>
