@@ -170,12 +170,11 @@ export class Renderer {
         const mark = board.get_mark(x, y);
         const pos = board.to_global_position(x, y);
 
-        ctx.clearRect(pos.x, pos.y, TILE_SIZE, TILE_SIZE);
-
         let width, height;
 
         switch (mark) {
             case Marks.NONE:
+                ctx.clearRect(pos.x, pos.y, TILE_SIZE, TILE_SIZE);
                 return;
 
             case Marks.BASIC:
@@ -202,6 +201,8 @@ export class Renderer {
                 break;
 
             case Marks.QUEEN:
+                ctx.clearRect(pos.x, pos.y, TILE_SIZE, TILE_SIZE);
+
                 width = TILE_SIZE * .4;
                 height = width;
 

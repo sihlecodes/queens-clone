@@ -177,6 +177,10 @@ export class Board {
             return;
 
         const current_mark = this.get_mark(x, y);
+
+        if (mark === current_mark)
+            return;
+
         const color = this.get_color(x, y);
 
         this.marks_grid[y][x] = mark;
