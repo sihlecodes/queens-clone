@@ -93,7 +93,7 @@ class Game {
     }
 
     register_mouse_events(board, element, input_handler) {
-        element.addEventListener('mousedown', (e) => e.preventDefault());
+        element.addEventListener('contextmenu', e => e.preventDefault());
 
         element.add_event_listener = function(name, tr) {
             this.addEventListener(name, function(e) {

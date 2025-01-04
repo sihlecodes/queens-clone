@@ -38,11 +38,8 @@ export class InputStateHandler {
 
         switch (name) {
             case 'touchstart':
-                console.log('touchstart')
-
             case 'mousedown':
                 this.handle_mouse_down(global_pos, mark);
-                // console.log('set ' + `(${this.previous_mouse_position.x}, ${this.previous_mouse_position.y})`);
                 break;
 
             case 'mousemove':
@@ -53,8 +50,6 @@ export class InputStateHandler {
                 break;
 
             case 'touchend':
-                console.log('touchend');
-
             case 'mouseup':
                 this.handle_mouse_up(relative_pos);
                 break;
