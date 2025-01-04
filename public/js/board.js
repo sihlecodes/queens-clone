@@ -9,9 +9,8 @@ export const Marks = {
 
 export class Board {
     constructor(layout) {
-        this.queens = new QueensValidator();
-        this.layout = layout;
-        this.clear();
+        this.validator = new QueensValidator();
+        this.reset(layout);
 
         this.handlers = {
             on_mark_applied: undefined,
@@ -20,34 +19,39 @@ export class Board {
             on_remove_queen: undefined,
         };
 
-        this.queens.handlers.on_valid_queens = (num_queens) => {
+        this.validator.handlers.on_valid_queens = (num_queens) => {
             this.handlers.on_valid_queens?.(num_queens);
         };
 
-        this.queens.handlers.on_remove_queen = () => {
+        this.validator.handlers.on_remove_queen = () => {
             this.handlers.on_remove_queen?.();
         };
 
-        this.queens.handlers.on_invalid_proximity = (coords) => {
+        this.validator.handlers.on_invalid_proximity = (coords) => {
             const cells = coords.map(({x, y}) => this.to_relative_int(x, y));
             this.handlers.on_invalid_queens?.(cells);
         }
 
-        this.queens.handlers.on_invalid_color = (x, y) => {
+        this.validator.handlers.on_invalid_color = (x, y) => {
             this.handlers.on_invalid_queens?.(this.get_cells_by_color(x, y));
         };
 
-        this.queens.handlers.on_invalid_column = (column) => {
+        this.validator.handlers.on_invalid_column = (column) => {
             this.handlers.on_invalid_queens?.(this.get_cells_by_column(column));
         };
 
-        this.queens.handlers.on_invalid_row = (row) => {
+        this.validator.handlers.on_invalid_row = (row) => {
             this.handlers.on_invalid_queens?.(this.get_cells_by_row(row));
         };
     }
 
+    reset(layout) {
+        this.layout = layout;
+        this.clear();
+    }
+
     clear() {
-        this.queens.clear();
+        this.validator.clear();
         this.marks_grid = [];
         this.initialize_marks_grid();
     }
@@ -186,10 +190,10 @@ export class Board {
         this.handlers.on_mark_applied?.(x, y);
 
         if (mark === Marks.QUEEN) {
-            this.queens.push_and_validate(x, y, color);
+            this.validator.push_and_validate(x, y, color);
         }
         else if (mark === Marks.NONE && current_mark === Marks.QUEEN) {
-            this.queens.remove_and_revalidate(x, y, color);
+            this.validator.remove_and_revalidate(x, y, color);
         }
     }
 

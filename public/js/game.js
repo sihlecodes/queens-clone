@@ -25,13 +25,9 @@ class Game {
 
         Global.TILE_SIZE = (Math.min(width, height) - Global.RENDER_OFFSET * 2) / board.columns();
 
-        board.handlers.on_remove_queen = () => {
-            renderer.clear_invalid_cells();
-        };
-
-        board.handlers.on_invalid_queens = (cells) => {
-            renderer.render_invalid_cells(cells);
-        };
+        board.handlers.on_mark_applied = (x, y) => renderer.render_mark(x, y);
+        board.handlers.on_remove_queen = () => renderer.clear_invalid_cells();
+        board.handlers.on_invalid_queens = (cells) => renderer.render_invalid_cells(cells);
 
         board.handlers.on_valid_queens = (num_queens) => {
             const win_condition = Math.min(board.columns(), board.rows());
@@ -48,9 +44,6 @@ class Game {
             }
         };
 
-        board.handlers.on_mark_applied = (x, y) => {
-            renderer.render_mark(x, y);
-        }
 
         input.handlers.on_first_click = () => {
             this.timer = setInterval(() => {
@@ -59,25 +52,11 @@ class Game {
             }, 1000);
         }
 
-        input.handlers.on_hover_changing = () => {
-            renderer.clear_mouse_position();
-        };
-
-        input.handlers.on_hover_changed = (x, y) => {
-            renderer.render_mouse_position(x, y);
-        };
-
-        input.handlers.on_clear = (x, y) => {
-            board.set_mark(x, y, Marks.NONE);
-        };
-
-        input.handlers.on_mark = (x, y) => {
-            board.set_mark(x, y, Marks.BASIC);
-        };
-
-        input.handlers.on_toggle = (x, y) => {
-            board.cycle_mark(x, y);
-        };
+        input.handlers.on_hover_changing = () => renderer.clear_mouse_position();
+        input.handlers.on_hover_changed = (x, y) => renderer.render_mouse_position(x, y);
+        input.handlers.on_clear = (x, y) => board.set_mark(x, y, Marks.NONE);
+        input.handlers.on_mark = (x, y) => board.set_mark(x, y, Marks.BASIC);
+        input.handlers.on_toggle = (x, y) => board.cycle_mark(x, y);
 
         renderer.render_board();
 
