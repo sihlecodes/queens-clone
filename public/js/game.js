@@ -61,18 +61,37 @@ class Game {
         renderer.render_board();
 
         this.register_mouse_events(board, canvas, input);
-        this.register_button_actions();
+        this.register_actions();
     }
 
-    register_button_actions() {
+    register_actions() {
         const btn_clear = document.getElementById('btn-clear');
-        const btn_new = document.getElementById('btn-new');
+        const btn_load = document.getElementById('btn-load');
+        const file_picker = document.getElementById('file-picker');
+        const img = document.getElementById('load-target');
 
+        img.onload = () => {
+            console.log('loading...');
+        };
+
+        file_picker.onchange = (e) => {
+            let file = e.target.files[0];
+
+            if (!file)
+                return;
+
+            let reader = new FileReader();
+
+            reader.onload = (e) => img.src = e.target.result;
+            reader.readAsDataURL(file);
+        };
+
+        btn_load.onclick = () => file_picker.click();
         btn_clear.onclick = () => this.clear();
     }
 
     register_mouse_events(board, element, input_handler) {
-        element.addEventListener('contextmenu', e => e.preventDefault());
+        element.oncontextmenu = (e) => e.preventDefault();
 
         element.add_event_listener = function(name, tr) {
             this.addEventListener(name, function(e) {
