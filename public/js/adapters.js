@@ -61,6 +61,11 @@ export class SVGToCanvasContext {
         return generator.next().value;
     }
 
+    add_line(start_x, start_y, end_x, end_y) {
+        this.moveTo(start_x, start_y);
+        this.lineTo(end_x, end_y);
+    }
+
     clearRect(x, y, width, height) {
         const generator = this.extract_all(x, y, width, height);
 
