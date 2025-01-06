@@ -5,25 +5,23 @@ import { Configuaration } from './configure.js';
 
 // Undefined properties are populated during runtime
 export const Global = {
-    TILE_SIZE: undefined,
     ...Configuaration,
 };
 
 class Game {
-    start() {
+    constructor() {
         this.canvas = document.getElementById('canvas');
 
-        const width = this.canvas.clientWidth;
-        const height = this.canvas.clientHeight;
+        const { clientWidth , clientHeight } = this.canvas;
 
-        this.board = new Board(Global.map);
-        this.renderer = new Renderer(this.canvas, this.board, width, height);
-        this.input = new InputStateHandler();
+        this.board = new Board(Global.map, clientWidth, clientHeight);
+        this.renderer = new Renderer(this.canvas, this.board);
+        this.input = new InputStateHandler(this.board);
         this.reset();
+    }
 
+    start() {
         const { canvas, board, renderer, input } = this;
-
-        Global.TILE_SIZE = (Math.min(width, height) - Global.RENDER_OFFSET * 2) / board.columns();
 
         board.handlers.on_mark_applied = (x, y) => renderer.render_mark(x, y);
         board.handlers.on_remove_queen = () => renderer.clear_invalid_cells();

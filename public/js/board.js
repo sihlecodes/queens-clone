@@ -8,9 +8,11 @@ export const Marks = {
 };
 
 export class Board {
-    constructor(layout) {
+    constructor(layout, width, height) {
         this.validator = new QueensValidator();
         this.reset(layout);
+        this.width = width;
+        this.height = height;
 
         this.handlers = {
             on_mark_applied: undefined,
@@ -64,6 +66,10 @@ export class Board {
                 this.marks_grid[y].push(Marks.NONE);
             }
         }
+    }
+
+    get_tile_size() {
+        return (Math.min(this.width, this.height) - Global.RENDER_OFFSET * 2) / this.columns();
     }
 
     iterate(callback) {
@@ -134,11 +140,8 @@ export class Board {
     }
 
     to_relative_position(global_x, global_y) {
-        return Board.to_relative_position(global_x, global_y);
-    }
-
-    static to_relative_position(global_x, global_y) {
-        const {TILE_SIZE, RENDER_OFFSET} = Global;
+        const {RENDER_OFFSET} = Global;
+        const TILE_SIZE = this.get_tile_size();
 
         return {
             x: Math.floor((global_x - RENDER_OFFSET) / TILE_SIZE),
@@ -147,11 +150,8 @@ export class Board {
     }
 
     to_global_position(relative_x, relative_y) {
-        return Board.to_global_position(relative_x, relative_y);
-    }
-
-    static to_global_position(relative_x, relative_y) {
-        const {TILE_SIZE, RENDER_OFFSET} = Global;
+        const {RENDER_OFFSET} = Global;
+        const TILE_SIZE = this.get_tile_size();
 
         return {
             x: RENDER_OFFSET + relative_x * TILE_SIZE,

@@ -18,10 +18,8 @@ function add_line(ctx, start_x, start_y, end_x, end_y) {
 }
 
 export class Renderer {
-    constructor(canvas, board, width, height) {
+    constructor(canvas, board) {
         this.canvas = new LayeredSVGToCanvasContext(canvas);
-        this.canvas.width = width;
-        this.canvas.height = height;
 
         // create layers upfront (sets the draw order)
         for (const layer of Object.values(Layers))
@@ -41,8 +39,8 @@ export class Renderer {
 
     clear() {
         this.clear_meta_invalid();
-        this.canvas.layer(Layers.MARKS).clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.canvas.layer(Layers.ERRORS).clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.canvas.layer(Layers.MARKS).clearRect(0, 0, this.board.width, this.board.height);
+        this.canvas.layer(Layers.ERRORS).clearRect(0, 0, this.board.width, this.board.height);
     }
 
     animate_completion() {
@@ -71,7 +69,7 @@ export class Renderer {
     }
 
     render_mouse_position(x, y) {
-        const { TILE_SIZE } = Global;
+        const TILE_SIZE = this.board.get_tile_size();
 
         if (!this.board.within_bounds(x, y))
             return;
@@ -85,11 +83,11 @@ export class Renderer {
 
     clear_mouse_position() {
         const ctx = this.canvas.layer(Layers.HOVER);
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.clearRect(0, 0, this.board.width, this.board.height);
     }
 
     render_invalid_cells(cells) {
-        const { TILE_SIZE } = Global;
+        const TILE_SIZE = this.board.get_tile_size();
         const { invalid } = this.styles;
 
         const ctx = this.canvas.layer(Layers.ERRORS);
@@ -121,7 +119,7 @@ export class Renderer {
     }
 
     clear_invalid_cells() {
-        this.canvas.layer(Layers.ERRORS).clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.canvas.layer(Layers.ERRORS).clearRect(0, 0, this.board.width, this.board.height);
 
         for (const queen of this.invalid_queens)
             queen.setAttribute('filter', 'none');
@@ -130,7 +128,7 @@ export class Renderer {
     }
 
     render_mark(x, y) {
-        const { TILE_SIZE } = Global;
+        const TILE_SIZE = this.board.get_tile_size();
         const { board } = this;
 
         const ctx = this.canvas.layer(Layers.MARKS);
@@ -181,9 +179,9 @@ export class Renderer {
     }
 
     render_board() {
-        const { TILE_SIZE } = Global;
         const { board } = this;
         const { outer, inner } = this.styles.outlines;
+        const TILE_SIZE = this.board.get_tile_size();
 
         let ctx = this.canvas.layer(Layers.BOARD);
         let outlines = this.canvas.layer(Layers.OUTLINES);
