@@ -2,6 +2,7 @@ import { Renderer } from './render.js';
 import { Board, Marks } from './board.js';
 import { InputStateHandler } from './input_handler.js';
 import { Configuaration } from './configure.js';
+import { load_map_from_image } from './load_map.js';
 
 // Undefined properties are populated during runtime
 export const Global = {
@@ -56,21 +57,29 @@ class Game {
         input.handlers.on_mark = (x, y) => board.set_mark(x, y, Marks.BASIC);
         input.handlers.on_toggle = (x, y) => board.cycle_mark(x, y);
 
-        renderer.render_board();
+        renderer.render_board(Global.theme.color_map);
 
         this.register_mouse_events(board, canvas, input);
         this.register_actions();
+    }
+
+    load_map(image) {
+        cv.then((cv) => {
+            const { color_map, map } = load_map_from_image(cv, image);
+
+            this.board.reset(map);
+            this.renderer.clear();
+            this.renderer.render_board(color_map);
+        });
     }
 
     register_actions() {
         const btn_clear = document.getElementById('btn-clear');
         const btn_load = document.getElementById('btn-load');
         const file_picker = document.getElementById('file-picker');
-        const img = document.getElementById('load-target');
+        const image = document.getElementById('load-target');
 
-        img.onload = () => {
-            console.log('loading...');
-        };
+        image.onload = () => this.load_map(image);
 
         file_picker.onchange = (e) => {
             let file = e.target.files[0];
@@ -80,7 +89,7 @@ class Game {
 
             let reader = new FileReader();
 
-            reader.onload = (e) => img.src = e.target.result;
+            reader.onload = (e) => image.src = e.target.result;
             reader.readAsDataURL(file);
         };
 
@@ -130,7 +139,7 @@ class Game {
 
     clear() {
         this.board.clear();
-        this.renderer.clear();
+        this.renderer.clear_marks();
         this.input.enable();
 
         if (this.completed)

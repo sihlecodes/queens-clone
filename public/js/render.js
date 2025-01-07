@@ -20,22 +20,26 @@ export class Renderer {
         for (const layer of Object.values(Layers))
             this.canvas.layer(layer);
 
-        this.color_map = Global.theme.color_map;
+        this.clear_meta();
         this.board = board;
-
-        this.clear_meta_invalid();
         this.styles = Global.theme;
     }
 
-    clear_meta_invalid() {
+    clear_meta() {
         this.invalid_marks = [];
         this.invalid_queens = [];
     }
 
+    clear_marks() {
+        this.clear_meta();
+        this.canvas.layer(Layers.MARKS).clear();
+        this.canvas.layer(Layers.ERRORS).clear();
+    }
+
     clear() {
-        this.clear_meta_invalid();
-        this.canvas.layer(Layers.MARKS).clearRect(0, 0, this.board.width, this.board.height);
-        this.canvas.layer(Layers.ERRORS).clearRect(0, 0, this.board.width, this.board.height);
+        this.canvas.layer(Layers.OUTLINES).clear();
+        this.canvas.layer(Layers.BOARD).clear();
+        this.clear_marks();
     }
 
     animate_completion() {
@@ -77,8 +81,7 @@ export class Renderer {
     }
 
     clear_mouse_position() {
-        const ctx = this.canvas.layer(Layers.HOVER);
-        ctx.clearRect(0, 0, this.board.width, this.board.height);
+        this.canvas.layer(Layers.HOVER).clear();
     }
 
     render_invalid_cells(cells) {
@@ -114,12 +117,12 @@ export class Renderer {
     }
 
     clear_invalid_cells() {
-        this.canvas.layer(Layers.ERRORS).clearRect(0, 0, this.board.width, this.board.height);
+        this.canvas.layer(Layers.ERRORS).clear();
 
         for (const queen of this.invalid_queens)
             queen.setAttribute('filter', 'none');
 
-        this.clear_meta_invalid();
+        this.clear_meta();
     }
 
     render_mark(x, y) {
@@ -173,7 +176,7 @@ export class Renderer {
         }
     }
 
-    render_board() {
+    render_board(color_map) {
         const { board } = this;
         const { outer, inner } = this.styles.outlines;
         const TILE_SIZE = this.board.get_tile_size();
@@ -192,7 +195,7 @@ export class Renderer {
             ctx.rect(pos.x, pos.y, TILE_SIZE, TILE_SIZE);
 
             // draw individual board tiles
-            ctx.fillStyle = this.styles.color_map[color];
+            ctx.fillStyle = color_map[color];
             ctx.stroke();
 
             // draw borders between color regions
