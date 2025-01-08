@@ -16,7 +16,7 @@ class Game {
         const { clientWidth , clientHeight } = this.canvas;
 
         this.board = new Board(Global.map, clientWidth, clientHeight);
-        this.renderer = new Renderer(this.canvas, this.board);
+        this.renderer = new Renderer(Global.theme, this.canvas, this.board);
         this.input = new InputStateHandler(this.board);
         this.reset();
     }
@@ -68,7 +68,7 @@ class Game {
             const { color_map, map } = load_map_from_image(cv, image);
 
             this.board.reset(map);
-            this.renderer.clear();
+            this.renderer.reset();
             this.renderer.render_board(color_map);
         });
     }

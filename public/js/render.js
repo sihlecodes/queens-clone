@@ -13,7 +13,7 @@ const Layers = {
 };
 
 export class Renderer {
-    constructor(canvas, board) {
+    constructor(styles, canvas, board) {
         this.canvas = new LayeredSVGToCanvasContext(canvas);
 
         // create layers upfront (sets the draw order)
@@ -22,7 +22,7 @@ export class Renderer {
 
         this.clear_meta();
         this.board = board;
-        this.styles = Global.theme;
+        this.styles = styles;
     }
 
     clear_meta() {
@@ -36,9 +36,13 @@ export class Renderer {
         this.canvas.layer(Layers.ERRORS).clear();
     }
 
-    clear() {
+    clear_board() {
         this.canvas.layer(Layers.OUTLINES).clear();
         this.canvas.layer(Layers.BOARD).clear();
+    }
+
+    reset() {
+        this.clear_board();
         this.clear_marks();
     }
 
