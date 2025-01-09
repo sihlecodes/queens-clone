@@ -18,6 +18,7 @@ class Game {
         this.board = new Board(Global.map, clientWidth, clientHeight);
         this.renderer = new Renderer(Global.theme, this.canvas, this.board);
         this.input = new InputStateHandler(this.board);
+        this.timer = undefined;
         this.reset();
     }
 
@@ -63,13 +64,17 @@ class Game {
         this.register_actions();
     }
 
-    load_map(image) {
-        cv.then((cv) => {
-            const { color_map, map } = load_map_from_image(cv, image);
+    async load_map(image) {
+        cv.then(async (cv) => {
+            await load_map_from_image(cv, image).then((response) => {
+                this.reset();
+                this.board.reset(response.map);
+                this.renderer.reset();
+                this.renderer.render_board(response.color_map);
 
-            this.board.reset(map);
-            this.renderer.reset();
-            this.renderer.render_board(color_map);
+            }).catch((reason) => {
+                console.log(reason);
+            });
         });
     }
 
@@ -148,11 +153,15 @@ class Game {
 
     reset() {
         this.time = 0;
-        this.update_elapsed_time(); // set the ui to 0:00
+        this.update_elapsed_time();
 
         this.completed = false;
-        this.timer = undefined;
         this.input.reset();
+
+        if (this.timer)
+            clearInterval(this.timer);
+
+        this.timer = undefined;
     }
 }
 
