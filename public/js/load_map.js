@@ -6,8 +6,20 @@ function is_similar(color1, color2, threshold = 2) {
     return comp1 < threshold && comp2 < threshold && comp3 < threshold;
 }
 
-const to_hash =  (color) => color.join(',');
-const from_hash = (hash) => hash.split(',').map(x => x * 1);
+function to_hash(color) {
+    return color.reduce((a, b, i) => a | (b << (i << 3)));
+}
+
+function from_hash(hash) {
+    let components = [];
+
+    while (hash != 0) {
+        components.push(hash & 0xFF);
+        hash >>= 8;
+    }
+
+    return components;
+}
 
 function get_dominant_color(cv, mat, roi, { threshold = 3, samples_x = 8, samples_y = 8 }) {
     let spread_x = Math.floor(roi.width / samples_x);
@@ -164,7 +176,7 @@ export async function load_map_from_image(cv, image) {
         contours.delete();
         hierarchy.delete();
 
-        colors = colors.map(color => `rgb(${color})`);
+        colors = colors.map(color => `rgb(${from_hash(color).join(',')})`);
         colors = ['', ...colors];
 
         console.log({color_map: colors, map});
