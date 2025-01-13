@@ -55,29 +55,15 @@ function get_dominant_color(mat, { threshold, samples_x = 8, samples_y = 8 }) {
 }
 
 export function load_map_from_image(image) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         let img = cv.imread(image);
 
         let min_dimension = Math.min(img.cols, img.rows);
-        const MIN_IMAGE_DIMENSION = 800;
+        const IDEAL_IMAGE_RESOLUTION = 1000;
+        const ratio = IDEAL_IMAGE_RESOLUTION / min_dimension;
 
-        if (min_dimension < MIN_IMAGE_DIMENSION) {
-            const ratio = MIN_IMAGE_DIMENSION / min_dimension;
-
-            cv.resize(img, img, new cv.Size(ratio * img.cols, ratio * img.rows));
-        }
+        cv.resize(img, img, new cv.Size(ratio * img.cols, ratio * img.rows));
         cv.imshow('o1', img);
-
-        // let kern = cv.matFromArray(3, 3, cv.CV_32F, [
-        //     0, -1, 0,
-        //     -1, 5, -1,
-        //     0, -1, 0,
-        // ]);
-        //
-        // cv.filter2D(img, img, cv.CV_8U, kern);
-        // cv.filter2D(img, img, cv.CV_8U, kern);
-
-        // cv.imshow('o2', img);
 
         let white = new cv.Scalar(255, 255, 255, 255);
         cv.copyMakeBorder(img, img, 10, 10, 10, 10, cv.BORDER_CONSTANT, white);
@@ -90,7 +76,7 @@ export function load_map_from_image(image) {
 
         let kernel;
 
-        kernel = new cv.Mat.ones(2, 2, cv.CV_8U);
+        kernel = new cv.Mat.ones(3, 3, cv.CV_8U);
         cv.dilate(edges, edges, kernel, new cv.Point(-1, -1), 1)
         kernel.delete();
 
@@ -136,7 +122,7 @@ export function load_map_from_image(image) {
 
                 let copy = img.clone();
                 cv.drawContours(copy, contours, i, randcolor(), 3);
-                cv.imshow('o2', copy);
+                cv.imshow('o1', copy);
                 copy.delete();
 
                 let contour = contours.get(i);
@@ -168,25 +154,15 @@ export function load_map_from_image(image) {
 
         let copy = img.clone();
         cv.drawContours(copy, contours, board_contour_index, new cv.Scalar(155, 90, 240, 255), 2);
-        cv.imshow('o2', copy);
+        cv.imshow('o1', copy);
         copy.delete();
 
         console.log('iterations:', its, 'contours:', contours.size());
 
-        // works surpising well across different screenshot resolutions
-        const BORDER_FACTOR = 0.0245;
-        const BORDER_OFFSET_X = board_bounds.width * BORDER_FACTOR;
-        const BORDER_OFFSET_Y = board_bounds.height * BORDER_FACTOR;
-
-        board_bounds.x += BORDER_OFFSET_X / 2;
-        board_bounds.y += BORDER_OFFSET_Y / 2;
-        board_bounds.width -= BORDER_OFFSET_X;
-        board_bounds.height -= BORDER_OFFSET_Y;
-
         let loops = 0;
-
         let next_child_index = hierarchy.intPtr(0, board_contour_index)[2];
-        let board = img.roi(board_bounds);
+
+        let children = [];
 
         while (next_child_index !== -1) {
             let bounds = cv.boundingRect(contours.get(next_child_index));
@@ -197,13 +173,15 @@ export function load_map_from_image(image) {
                 continue;
             }
 
-            // if (Math.abs(bounds.width - bounds.height) < 10)
+            children.push(bounds);
             loops++;
 
-            let copy = img.clone();
+            copy = img.clone();
             
-            cv.drawContours(copy, contours, next_child_index, new cv.Scalar(0, 120, 230, 255), -1);
+            cv.drawContours(copy, contours, next_child_index, new cv.Scalar(0, 120, 230, 255), 20);
             cv.imshow('o1', copy);
+
+            // await new Promise((resolve, _) => setTimeout(resolve, 100));
 
             next_child_index = hierarchy.intPtr(0, next_child_index)[0];
             copy.delete();
@@ -211,49 +189,37 @@ export function load_map_from_image(image) {
 
         console.log('loops:', loops);
 
-        let division_votes = {};
+        let divisions = Math.sqrt(loops);
 
-        for (let i = 0; i < contours.size(); ++i) {
-            let { width, height } = cv.boundingRect(contours.get(i));
-            let average = (width + height) / 2;
-            let divisions = Math.floor(board_bounds.width / average);
+        if (divisions !== Math.floor(divisions))
+            return reject('dimension miss match');
 
-            if (divisions > 2 && divisions < 12) {
-                if (!(divisions in division_votes))
-                    division_votes[divisions] = 0;
-
-                division_votes[divisions]++;
-            }
-        }
+        console.log('divisions:', divisions);
 
         contours.delete();
         hierarchy.delete();
-
-        const nominees = Object.keys(division_votes); 
-
-        if (nominees.length === 0)
-            return reject('board not found');
-
-        let divions = nominees.reduce(
-            (a, b) => division_votes[a] > division_votes[b] ? a : b) * 1;
-
-        let tile_width = board_bounds.width / divions;
-        let tile_height = board_bounds.height / divions;
 
         let color_hashes = [];
         let threshold = 20;
         let map = [];
 
-        for (let i = 0; i < divions; i++)
+        for (let i = 0; i < divisions; i++)
             map.push([]);
 
-        for (let y = 0; y < divions; y++) {
-            label: for (let x = 0; x < divions; x++) {
-                let pos_x = x * tile_width;
-                let pos_y = y * tile_height;
+        for (let y = 0; y < divisions; y++) {
+            let row = children.splice(children.length - divisions, divisions);
+            row = row.sort((a, b) => a.x - b.x);
 
-                let region = new cv.Rect(pos_x, pos_y, tile_width, tile_height);
-                let tile = board.roi(region);
+            label: for (let x = 0; x < divisions; x++) {
+                let region = row[x];
+                let copy = img.clone();
+                cv.rectangle(copy, {x: region.x, y: region.y}, {x: region.x+region.width, y: region.y+region.height}, randcolor(), 20);
+                cv.imshow('o1', copy);
+                copy.delete();
+
+                // await new Promise((resolve, _) => setTimeout(resolve, 100));
+
+                let tile = img.roi(region);
 
                 cv.cvtColor(tile, tile, cv.COLOR_RGB2HSV);
                 let dominant_color_hsv = get_dominant_color(tile, { threshold: 10 });
@@ -279,7 +245,7 @@ export function load_map_from_image(image) {
         }
 
 
-        if (color_hashes.length !== divions)
+        if (color_hashes.length !== divisions)
             return reject('dimension miss match');
 
         img.delete();
