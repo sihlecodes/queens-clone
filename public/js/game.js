@@ -64,17 +64,17 @@ class Game {
         this.register_actions();
     }
 
-    load_map(image) {
-        cv.then((cv) => {
-            load_map_from_image(cv, image).then((response) => {
-                this.reset();
-                this.board.reset(response.map);
-                this.renderer.reset();
-                this.renderer.render_board(response.color_map);
+    async load_map(image) {
+        cv = await cv;
 
-            }).catch((reason) => {
-                console.log(reason);
-            });
+        load_map_from_image(image).then((response) => {
+            this.reset();
+            this.board.reset(response.map);
+            this.renderer.reset();
+            this.renderer.render_board(response.color_map);
+
+        }).catch((reason) => {
+            console.log(reason);
         });
     }
 

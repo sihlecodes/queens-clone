@@ -1,19 +1,15 @@
 function is_similar(color1, color2, threshold = 2) {
-    const comp1 = Math.abs(color1[0] - color2[0]);
-    const comp2 = Math.abs(color1[1] - color2[1]);
-    const comp3 = Math.abs(color1[2] - color2[2]);
-
-    return comp1 < threshold && comp2 < threshold && comp3 < threshold;
+    return color1.every((c1, i) => Math.abs(c1 - color2[i]) < threshold);
 }
 
 function to_hash(color) {
     return color.reduce((a, b, i) => a | (b << (i << 3)));
 }
 
-function from_hash(hash) {
+function from_hash(hash, comps=3) {
     let components = [];
 
-    while (hash != 0) {
+    while (comps-- > 0) {
         components.push(hash & 0xFF);
         hash >>= 8;
     }
@@ -21,27 +17,29 @@ function from_hash(hash) {
     return components;
 }
 
-function get_dominant_color(cv, mat, roi, { threshold = 3, samples_x = 8, samples_y = 8 }) {
-    let spread_x = Math.floor(roi.width / samples_x);
-    let spread_y = Math.floor(roi.height / samples_y);
+function get_dominant_color(mat, { threshold, samples_x = 8, samples_y = 8 }) {
+    const PADDING_RATIO = 0.1;
 
-    mat = mat.roi(roi);
-    cv.cvtColor(mat, mat, cv.COLOR_RGB2HSV);
+    let padding_x = mat.cols * PADDING_RATIO;
+    let padding_y = mat.rows * PADDING_RATIO;
 
-    let color_votes = {}
+    let spread_x = (mat.cols - 2 * padding_x) / samples_x;
+    let spread_y = (mat.rows - 2 * padding_y) / samples_y;
 
-    for (let y = 0; y < samples_y; y++) {
-        label: for (let x = 0; x < samples_x; x++) {
+    let color_votes = {};
+
+    for (let y = 0; y <= samples_y; y++) {
+        label: for (let x = 0; x <= samples_x; x++) {
             let pos = {
-                x: ((x + 1) * spread_x) - 1,
-                y: ((y + 1) * spread_y) - 1,
+                x: padding_x + (x * spread_x),
+                y: padding_y + (y * spread_y),
             }
 
-            let hsv = mat.ucharPtr(pos.y, pos.x);
+            let hsv = mat.ucharPtr(pos.x, pos.y);
 
-            for (const c in color_votes) {
-                if (is_similar(from_hash(c), hsv, threshold)) {
-                    color_votes[c] += 1;
+            for (const hash in color_votes) {
+                if (is_similar(from_hash(hash), hsv, threshold)) {
+                    color_votes[hash] += 1;
                     continue label;
                 }
             }
@@ -49,137 +47,246 @@ function get_dominant_color(cv, mat, roi, { threshold = 3, samples_x = 8, sample
             color_votes[to_hash(hsv)] = 0;
         }
     }
-    const dominant_color_hsv = from_hash(Object.keys(color_votes).reduce(
-        (a, b) => color_votes[a] > color_votes[b] ? a : b));
 
-    let color = new cv.Mat(1, 1, cv.CV_8UC3);
+    const dominant_color_hash = Object.keys(color_votes).reduce(
+        (a, b) => color_votes[a] > color_votes[b] ? a : b);
 
-    color.setTo([...dominant_color_hsv, 255]);
-    cv.cvtColor(color, color, cv.COLOR_HSV2RGB);
-
-    let dominant_color_rgb = Array.from(color.data);
-
-    color.delete();
-    mat.delete();
-
-    return dominant_color_rgb;
+    return from_hash(dominant_color_hash);
 }
 
-export async function load_map_from_image(cv, image) {
+export function load_map_from_image(image) {
     return new Promise((resolve, reject) => {
         let img = cv.imread(image);
-        let gray = new cv.Mat();
 
-        cv.cvtColor(img, gray, cv.COLOR_RGBA2GRAY, 0);
-        // let blur = new cv.Mat();
-        // cv.GaussianBlur(img, img, new cv.Size(1, 1), 1);
+        let min_dimension = Math.min(img.cols, img.rows);
+        const MIN_IMAGE_DIMENSION = 800;
+
+        if (min_dimension < MIN_IMAGE_DIMENSION) {
+            const ratio = MIN_IMAGE_DIMENSION / min_dimension;
+
+            cv.resize(img, img, new cv.Size(ratio * img.cols, ratio * img.rows));
+        }
+        cv.imshow('o1', img);
+
+        // let kern = cv.matFromArray(3, 3, cv.CV_32F, [
+        //     0, -1, 0,
+        //     -1, 5, -1,
+        //     0, -1, 0,
+        // ]);
+        //
+        // cv.filter2D(img, img, cv.CV_8U, kern);
+        // cv.filter2D(img, img, cv.CV_8U, kern);
+
+        // cv.imshow('o2', img);
+
+        let white = new cv.Scalar(255, 255, 255, 255);
+        cv.copyMakeBorder(img, img, 10, 10, 10, 10, cv.BORDER_CONSTANT, white);
 
         let edges = new cv.Mat();
-        let contours = new cv.MatVector();
-        let hierarchy = new cv.Mat();
+        cv.Canny(img, edges, 100, 200);
+        // cv.GaussianBlur(img, img, new cv.Size(3, 3), 1);
 
-        cv.Canny(gray, edges, 100, 200);
-        let kernel = new cv.Mat.ones(3, 3, cv.CV_8U);
-        cv.GaussianBlur(edges, edges, new cv.Size(5, 5), 1);
+        cv.imshow('o1', edges);
 
-        kernel = new cv.Mat.ones(11, 11, cv.CV_8U);
+        let kernel;
+
+        kernel = new cv.Mat.ones(2, 2, cv.CV_8U);
         cv.dilate(edges, edges, kernel, new cv.Point(-1, -1), 1)
-
         kernel.delete();
-        kernel = new cv.Mat.ones(13, 13, cv.CV_8U);
+
+        cv.imshow('o1', edges);
+
+        kernel = cv.Mat.ones(11, 11, cv.CV_8U);
+        cv.morphologyEx(edges, edges, cv.MORPH_CLOSE, kernel);
+        kernel.delete();
+
+        cv.imshow('o1', edges);
+
+        kernel = cv.Mat.ones(2, 2, cv.CV_8U);
         cv.erode(edges, edges, kernel, new cv.Point(-1, -1), 1)
         kernel.delete();
 
-        cv.findContours(edges, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
+        cv.imshow('o1', edges);
 
-        let max_contour = contours.get(0);
-        let max_area = cv.contourArea(max_contour);
+        let contours = new cv.MatVector();
+        let hierarchy = new cv.Mat();
 
-        for (let i = 1; i < contours.size(); ++i) {
-            let area = cv.contourArea(contours.get(i));
+        cv.findContours(edges, contours, hierarchy, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE);
 
-            if (area > max_area) {
-                max_area = area;
-                max_contour = contours.get(i);
+        let i = 0;
+        let board_bounds = null;
+        let board_contour_index = -1;
+        let largest_area = 0;
+
+        cv.imshow('o1', edges);
+        let its = 0;
+        let queue = [];
+
+        const randint = (min, max) => Math.floor(min + (Math.random() * (max - min)));
+        const randcolor = () => new cv.Scalar(randint(0, 100), randint(50, 255), randint(100, 255), 255);
+
+        while (!board_bounds || board_bounds.width < 200) {
+            let next  = hierarchy.intPtr(0, i)[0];
+            let child = hierarchy.intPtr(0, i)[2];
+
+            if (child >= 0) {
+                queue.push(child);
+
+                its++;
+
+                let copy = img.clone();
+                cv.drawContours(copy, contours, i, randcolor(), 3);
+                cv.imshow('o2', copy);
+                copy.delete();
+
+                let contour = contours.get(i);
+                let bounds = cv.boundingRect(contour);
+
+                // is roughly a square
+                if (Math.abs(bounds.width - bounds.height) <= 5) {
+                    let area = bounds.width * bounds.height;
+
+                    if (area > largest_area) {
+                        board_contour_index = i;
+                        board_bounds = bounds;
+                        largest_area = area;
+                    }
+                }
+            }
+
+            if (next >= 0)
+                i = next;
+            
+            else if (queue.length > 0)
+                i = queue.shift();
+
+            else {
+                reject('board not found');
+                break;
             }
         }
 
-        console.log(contours.size());
+        let copy = img.clone();
+        cv.drawContours(copy, contours, board_contour_index, new cv.Scalar(155, 90, 240, 255), 2);
+        cv.imshow('o2', copy);
+        copy.delete();
 
-        let board_bbox = cv.boundingRect(max_contour)
-        let div_votes = {};
+        console.log('iterations:', its, 'contours:', contours.size());
+
+        // works surpising well across different screenshot resolutions
+        const BORDER_FACTOR = 0.0245;
+        const BORDER_OFFSET_X = board_bounds.width * BORDER_FACTOR;
+        const BORDER_OFFSET_Y = board_bounds.height * BORDER_FACTOR;
+
+        board_bounds.x += BORDER_OFFSET_X / 2;
+        board_bounds.y += BORDER_OFFSET_Y / 2;
+        board_bounds.width -= BORDER_OFFSET_X;
+        board_bounds.height -= BORDER_OFFSET_Y;
+
+        let loops = 0;
+
+        let next_child_index = hierarchy.intPtr(0, board_contour_index)[2];
+        let board = img.roi(board_bounds);
+
+        while (next_child_index !== -1) {
+            let bounds = cv.boundingRect(contours.get(next_child_index));
+            let area = bounds.width * bounds.height;
+
+            if (area >= largest_area / 2) {
+                next_child_index = hierarchy.intPtr(0, next_child_index)[2];
+                continue;
+            }
+
+            // if (Math.abs(bounds.width - bounds.height) < 10)
+            loops++;
+
+            let copy = img.clone();
+            
+            cv.drawContours(copy, contours, next_child_index, new cv.Scalar(0, 120, 230, 255), -1);
+            cv.imshow('o1', copy);
+
+            next_child_index = hierarchy.intPtr(0, next_child_index)[0];
+            copy.delete();
+        }
+
+        console.log('loops:', loops);
+
+        let division_votes = {};
 
         for (let i = 0; i < contours.size(); ++i) {
             let { width, height } = cv.boundingRect(contours.get(i));
-            let mid = Math.floor((width + height) / 2);
-            let divs = Math.floor(board_bbox.width / mid);
+            let average = (width + height) / 2;
+            let divisions = Math.floor(board_bounds.width / average);
 
-            if (divs > 2 && divs < 12) {
-                if (!(divs in div_votes))
-                    div_votes[divs] = 0
+            if (divisions > 2 && divisions < 12) {
+                if (!(divisions in division_votes))
+                    division_votes[divisions] = 0;
 
-                div_votes[divs]++;
+                division_votes[divisions]++;
             }
         }
 
-        const nominees = Object.keys(div_votes); 
+        contours.delete();
+        hierarchy.delete();
 
-        if (nominees.length === 0) {
-            reject('board not found');
-            return;
-        }
+        const nominees = Object.keys(division_votes); 
 
-        let divs = nominees.reduce((a, b) => div_votes[a] > div_votes[b] ? a : b) * 1;
-        let tile_size = board_bbox.width / divs;
-        console.log(`divisions: ${divs}`);
-        console.log('tile_size: ', tile_size);
+        if (nominees.length === 0)
+            return reject('board not found');
 
-        let colors = [];
-        let threshold = 16;
+        let divions = nominees.reduce(
+            (a, b) => division_votes[a] > division_votes[b] ? a : b) * 1;
+
+        let tile_width = board_bounds.width / divions;
+        let tile_height = board_bounds.height / divions;
+
+        let color_hashes = [];
+        let threshold = 20;
         let map = [];
 
-        for (let i = 0; i < divs; i++)
+        for (let i = 0; i < divions; i++)
             map.push([]);
 
-        for (let y = 0; y < divs; y++) {
-            label: for (let x = 0; x < divs; x++) {
-                let pos_x = x * tile_size + board_bbox.x;
-                let pos_y = y * tile_size + board_bbox.y;
+        for (let y = 0; y < divions; y++) {
+            label: for (let x = 0; x < divions; x++) {
+                let pos_x = x * tile_width;
+                let pos_y = y * tile_height;
 
-                let roi = new cv.Rect(pos_x, pos_y, tile_size, tile_size);
-                let dominant_color = get_dominant_color(cv, img, roi, { threshold });
-                let dominant_color_as_hash = to_hash(dominant_color);
+                let region = new cv.Rect(pos_x, pos_y, tile_width, tile_height);
+                let tile = board.roi(region);
 
-                for (let i = 0; i < colors.length; i++) {
-                    const color = colors[i];
-                    console.log('determining layout');
+                cv.cvtColor(tile, tile, cv.COLOR_RGB2HSV);
+                let dominant_color_hsv = get_dominant_color(tile, { threshold: 10 });
 
-                    if (is_similar(from_hash(color), dominant_color, threshold)) {
-                        map[y][x] = i + 1;
+                let pixel = new cv.Mat(1, 1, cv.CV_8UC3, [...dominant_color_hsv, 255]);
+                cv.cvtColor(pixel, pixel, cv.COLOR_HSV2RGB);
+
+                let dominant_color_rgb = pixel.data;
+                let dominant_color_as_hash = to_hash(dominant_color_rgb);
+
+                for (let i = 0; i < color_hashes.length; i++) {
+                    const hash = color_hashes[i];
+
+                    if (is_similar(from_hash(hash), dominant_color_rgb, threshold)) {
+                        map[y][x] = i;
                         continue label;
                     }
                 }
 
-                colors.push(dominant_color_as_hash);
-                map[y][x] = colors.length;
+                color_hashes.push(dominant_color_as_hash);
+                map[y][x] = color_hashes.length - 1;
             }
         }
 
-        if (!map || !map[0] || map[0].length !== colors.length) {
-            reject('dimension miss match error');
-        }
 
+        if (color_hashes.length !== divions)
+            return reject('dimension miss match');
 
-        gray.delete();
         img.delete();
         edges.delete();
-        contours.delete();
-        hierarchy.delete();
 
-        colors = colors.map(color => `rgb(${from_hash(color).join(',')})`);
-        colors = ['', ...colors];
+        let color_map = color_hashes.map(hash => `rgb(${from_hash(hash).join(',')})`);
 
-        console.log({color_map: colors, map});
-        resolve({color_map: colors, map});
+        resolve({color_map, map});
     });
 }
