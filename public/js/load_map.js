@@ -199,34 +199,57 @@ export function load_map_from_image(image) {
         for (let i = 0; i < divisions; i++)
             map.push([]);
 
+        let new_contours = new cv.MatVector();
+
         for (let y = 0; y < divisions; y++) {
             let row = children.splice(children.length - divisions, divisions);
             row = row.sort((a, b) => a.bounds.x - b.bounds.x);
 
             label: for (let x = 0; x < divisions; x++) {
-                let region = row[x].bounds;
-                let copy = img.clone();
-                cv.rectangle(copy, {x: region.x, y: region.y}, {x: region.x+region.width, y: region.y+region.height}, randcolor(), -1);
+                let bounds = row[x].bounds;
+                let index = row[x].index;
+
+                let M = cv.matFromArray(2, 3, cv.CV_64F,
+                        [1, 0, -bounds.x,
+                         0, 1, -bounds.y]);
+
+                // let copy = img.clone();
+                // cv.rectangle(copy, {x: bounds.x, y: bounds.y}, {x: bounds.x+bounds.width, y: bounds.y+bounds.height}, randcolor(), -1);
                 // cv.imshow('o1', copy);
-                copy.delete();
+                // copy.delete();
+
+                let contour = contours.get(index);
+                cv.transform(contour, contour, M);
+
+                new_contours.push_back(contour);
+
+                let child = hierarchy.intPtr(0, index)[2];
+                let tile = img.roi(bounds);
+
+                let mask = new cv.Mat.zeros(tile.rows, tile.cols, cv.CV_8UC1);
+                cv.drawContours(mask, new_contours, new_contours.size() - 1, new cv.Scalar(255), -1);
+                // cv.imshow('o1', mask);
+
+                if (child !== -1) {
+                    contour = contours.get(child);
+
+                    cv.transform(contour, contour, M);
+                    new_contours.push_back(contour);
+
+                    cv.drawContours(mask, new_contours, new_contours.size() - 1, new cv.Scalar(0), -1);
+                }
 
                 // await new Promise((resolve, _) => setTimeout(resolve, 100));
-                let index = row[x].index;
-                let child = hierarchy.intPtr(0, index)[2];
-                let tile = img.roi(region);
-                cv.imshow('o2', tile);
+                cv.imshow('o1', tile);
+                cv.imshow('o2', mask);
 
-                let mask = new cv.Mat(img.rows, img.cols, cv.CV_8UC1, new cv.Scalar(255));
+                let test = new cv.Mat();
 
-                if (child !== -1)
-                    cv.drawContours(mask, contours, child, new cv.Scalar(0), -1);
+                cv.bitwise_and(tile, tile, test, mask);
+                cv.imshow('o3', test);
 
-                let cmask = mask.roi(region);
-                cv.imshow('o1', cmask);
+                let dominant_color_rgb = cv.mean(tile, mask);
 
-                let dominant_color_rgb = cv.mean(tile, cmask);
-
-                cmask.delete();
                 mask.delete();
 
                 let dominant_color_as_hash = to_hash(dominant_color_rgb);
