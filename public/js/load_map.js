@@ -63,7 +63,7 @@ export function load_map_from_image(image) {
         const ratio = IDEAL_IMAGE_RESOLUTION / min_dimension;
 
         cv.resize(img, img, new cv.Size(ratio * img.cols, ratio * img.rows));
-        cv.imshow('o1', img);
+        // cv.imshow('o1', img);
 
         let white = new cv.Scalar(255, 255, 255, 255);
         cv.copyMakeBorder(img, img, 10, 10, 10, 10, cv.BORDER_CONSTANT, white);
@@ -72,7 +72,7 @@ export function load_map_from_image(image) {
         cv.Canny(img, edges, 100, 200);
         // cv.GaussianBlur(img, img, new cv.Size(3, 3), 1);
 
-        cv.imshow('o1', edges);
+        // cv.imshow('o1', edges);
 
         let kernel;
 
@@ -80,31 +80,32 @@ export function load_map_from_image(image) {
         cv.dilate(edges, edges, kernel, new cv.Point(-1, -1), 1)
         kernel.delete();
 
-        cv.imshow('o1', edges);
+        // cv.imshow('o1', edges);
 
         kernel = cv.Mat.ones(11, 11, cv.CV_8U);
         cv.morphologyEx(edges, edges, cv.MORPH_CLOSE, kernel);
         kernel.delete();
 
-        cv.imshow('o1', edges);
+        // cv.imshow('o1', edges);
 
-        kernel = cv.Mat.ones(2, 2, cv.CV_8U);
-        cv.erode(edges, edges, kernel, new cv.Point(-1, -1), 1)
-        kernel.delete();
+        // kernel = cv.Mat.ones(2, 2, cv.CV_8U);
+        // cv.erode(edges, edges, kernel, new cv.Point(-1, -1), 1)
+        // kernel.delete();
 
-        cv.imshow('o1', edges);
+        // cv.imshow('o1', edges);
 
         let contours = new cv.MatVector();
         let hierarchy = new cv.Mat();
 
         cv.findContours(edges, contours, hierarchy, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE);
+        edges.delete();
 
         let i = 0;
         let board_bounds = null;
         let board_contour_index = -1;
         let largest_area = 0;
 
-        cv.imshow('o1', edges);
+        // cv.imshow('o1', edges);
         let its = 0;
         let queue = [];
 
@@ -120,10 +121,10 @@ export function load_map_from_image(image) {
 
                 its++;
 
-                let copy = img.clone();
-                cv.drawContours(copy, contours, i, randcolor(), 3);
-                cv.imshow('o1', copy);
-                copy.delete();
+                // let copy = img.clone();
+                // cv.drawContours(copy, contours, i, randcolor(), 3);
+                // cv.imshow('o1', copy);
+                // copy.delete();
 
                 let contour = contours.get(i);
                 let bounds = cv.boundingRect(contour);
@@ -152,39 +153,34 @@ export function load_map_from_image(image) {
             }
         }
 
-        let copy = img.clone();
-        cv.drawContours(copy, contours, board_contour_index, new cv.Scalar(155, 90, 240, 255), 2);
-        cv.imshow('o1', copy);
-        copy.delete();
+        // let copy = img.clone();
+        // cv.drawContours(copy, contours, board_contour_index, new cv.Scalar(155, 90, 240, 255), 2);
+        // cv.imshow('o1', copy);
+        // copy.delete();
 
         console.log('iterations:', its, 'contours:', contours.size());
 
         let loops = 0;
-        let next_child_index = hierarchy.intPtr(0, board_contour_index)[2];
+        let child_index = hierarchy.intPtr(0, board_contour_index)[2];
 
         let children = [];
 
-        while (next_child_index !== -1) {
-            let bounds = cv.boundingRect(contours.get(next_child_index));
-            let area = bounds.width * bounds.height;
+        while (child_index !== -1) {
+            let bounds = cv.boundingRect(contours.get(child_index));
 
-            if (area >= largest_area / 2) {
-                next_child_index = hierarchy.intPtr(0, next_child_index)[2];
-                continue;
+            if (bounds.width > 50) {
+                children.push({index: child_index, bounds});
+                loops++;
             }
 
-            children.push(bounds);
-            loops++;
-
-            copy = img.clone();
-            
-            cv.drawContours(copy, contours, next_child_index, new cv.Scalar(0, 120, 230, 255), 20);
-            cv.imshow('o1', copy);
+            // copy = img.clone();
+            // cv.drawContours(copy, contours, child_index, new cv.Scalar(0, 120, 230, 255), 20);
+            // cv.imshow('o1', copy);
+            // copy.delete();
 
             // await new Promise((resolve, _) => setTimeout(resolve, 100));
 
-            next_child_index = hierarchy.intPtr(0, next_child_index)[0];
-            copy.delete();
+            child_index = hierarchy.intPtr(0, child_index)[0];
         }
 
         console.log('loops:', loops);
@@ -196,11 +192,8 @@ export function load_map_from_image(image) {
 
         console.log('divisions:', divisions);
 
-        contours.delete();
-        hierarchy.delete();
-
         let color_hashes = [];
-        let threshold = 20;
+        let threshold = 10;
         let map = [];
 
         for (let i = 0; i < divisions; i++)
@@ -208,26 +201,34 @@ export function load_map_from_image(image) {
 
         for (let y = 0; y < divisions; y++) {
             let row = children.splice(children.length - divisions, divisions);
-            row = row.sort((a, b) => a.x - b.x);
+            row = row.sort((a, b) => a.bounds.x - b.bounds.x);
 
             label: for (let x = 0; x < divisions; x++) {
-                let region = row[x];
+                let region = row[x].bounds;
                 let copy = img.clone();
-                cv.rectangle(copy, {x: region.x, y: region.y}, {x: region.x+region.width, y: region.y+region.height}, randcolor(), 20);
-                cv.imshow('o1', copy);
+                cv.rectangle(copy, {x: region.x, y: region.y}, {x: region.x+region.width, y: region.y+region.height}, randcolor(), -1);
+                // cv.imshow('o1', copy);
                 copy.delete();
 
                 // await new Promise((resolve, _) => setTimeout(resolve, 100));
-
+                let index = row[x].index;
+                let child = hierarchy.intPtr(0, index)[2];
                 let tile = img.roi(region);
+                cv.imshow('o2', tile);
 
-                cv.cvtColor(tile, tile, cv.COLOR_RGB2HSV);
-                let dominant_color_hsv = get_dominant_color(tile, { threshold: 10 });
+                let mask = new cv.Mat(img.rows, img.cols, cv.CV_8UC1, new cv.Scalar(255));
 
-                let pixel = new cv.Mat(1, 1, cv.CV_8UC3, [...dominant_color_hsv, 255]);
-                cv.cvtColor(pixel, pixel, cv.COLOR_HSV2RGB);
+                if (child !== -1)
+                    cv.drawContours(mask, contours, child, new cv.Scalar(0), -1);
 
-                let dominant_color_rgb = pixel.data;
+                let cmask = mask.roi(region);
+                cv.imshow('o1', cmask);
+
+                let dominant_color_rgb = cv.mean(tile, cmask);
+
+                cmask.delete();
+                mask.delete();
+
                 let dominant_color_as_hash = to_hash(dominant_color_rgb);
 
                 for (let i = 0; i < color_hashes.length; i++) {
@@ -244,12 +245,13 @@ export function load_map_from_image(image) {
             }
         }
 
+        contours.delete();
+        hierarchy.delete();
 
         if (color_hashes.length !== divisions)
             return reject('dimension miss match');
 
         img.delete();
-        edges.delete();
 
         let color_map = color_hashes.map(hash => `rgb(${from_hash(hash).join(',')})`);
 
