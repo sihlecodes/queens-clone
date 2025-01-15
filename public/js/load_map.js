@@ -1,57 +1,5 @@
-function is_similar(color1, color2, threshold = 2) {
+function is_similar(color1, color2, threshold) {
     return color1.every((c1, i) => Math.abs(c1 - color2[i]) < threshold);
-}
-
-function to_hash(color) {
-    return color.reduce((a, b, i) => a | (b << (i << 3)));
-}
-
-function from_hash(hash, comps=3) {
-    let components = [];
-
-    while (comps-- > 0) {
-        components.push(hash & 0xFF);
-        hash >>= 8;
-    }
-
-    return components;
-}
-
-function get_dominant_color(mat, { threshold, samples_x = 8, samples_y = 8 }) {
-    const PADDING_RATIO = 0.1;
-
-    let padding_x = mat.cols * PADDING_RATIO;
-    let padding_y = mat.rows * PADDING_RATIO;
-
-    let spread_x = (mat.cols - 2 * padding_x) / samples_x;
-    let spread_y = (mat.rows - 2 * padding_y) / samples_y;
-
-    let color_votes = {};
-
-    for (let y = 0; y <= samples_y; y++) {
-        label: for (let x = 0; x <= samples_x; x++) {
-            let pos = {
-                x: padding_x + (x * spread_x),
-                y: padding_y + (y * spread_y),
-            }
-
-            let hsv = mat.ucharPtr(pos.x, pos.y);
-
-            for (const hash in color_votes) {
-                if (is_similar(from_hash(hash), hsv, threshold)) {
-                    color_votes[hash] += 1;
-                    continue label;
-                }
-            }
-
-            color_votes[to_hash(hsv)] = 0;
-        }
-    }
-
-    const dominant_color_hash = Object.keys(color_votes).reduce(
-        (a, b) => color_votes[a] > color_votes[b] ? a : b);
-
-    return from_hash(dominant_color_hash);
 }
 
 export function load_map_from_image(image) {
@@ -70,9 +18,8 @@ export function load_map_from_image(image) {
 
         let edges = new cv.Mat();
         cv.Canny(img, edges, 100, 200);
-        // cv.GaussianBlur(img, img, new cv.Size(3, 3), 1);
 
-        // cv.imshow('o1', edges);
+        cv.imshow('o1', edges);
 
         let kernel;
 
@@ -80,13 +27,13 @@ export function load_map_from_image(image) {
         cv.dilate(edges, edges, kernel, new cv.Point(-1, -1), 1)
         kernel.delete();
 
-        // cv.imshow('o1', edges);
+        cv.imshow('o1', edges);
 
-        kernel = cv.Mat.ones(11, 11, cv.CV_8U);
+        kernel = cv.Mat.ones(9, 9, cv.CV_8U);
         cv.morphologyEx(edges, edges, cv.MORPH_CLOSE, kernel);
         kernel.delete();
 
-        // cv.imshow('o1', edges);
+        cv.imshow('o1', edges);
 
         // kernel = cv.Mat.ones(2, 2, cv.CV_8U);
         // cv.erode(edges, edges, kernel, new cv.Point(-1, -1), 1)
@@ -100,33 +47,31 @@ export function load_map_from_image(image) {
         cv.findContours(edges, contours, hierarchy, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE);
         edges.delete();
 
-        let i = 0;
-        let board_bounds = null;
+        let index = 0;
         let board_contour_index = -1;
         let largest_area = 0;
 
-        // cv.imshow('o1', edges);
         let its = 0;
         let queue = [];
 
         const randint = (min, max) => Math.floor(min + (Math.random() * (max - min)));
         const randcolor = () => new cv.Scalar(randint(0, 100), randint(50, 255), randint(100, 255), 255);
 
-        while (!board_bounds || board_bounds.width < 200) {
-            let next  = hierarchy.intPtr(0, i)[0];
-            let child = hierarchy.intPtr(0, i)[2];
+        while (largest_area < 200 * 200) {
+            let next  = hierarchy.intPtr(0, index)[0];
+            let child = hierarchy.intPtr(0, index)[2];
 
             if (child >= 0) {
                 queue.push(child);
 
                 its++;
 
-                // let copy = img.clone();
-                // cv.drawContours(copy, contours, i, randcolor(), 3);
-                // cv.imshow('o1', copy);
-                // copy.delete();
+                let copy = img.clone();
+                cv.drawContours(copy, contours, index, randcolor(), 3);
+                cv.imshow('o1', copy);
+                copy.delete();
 
-                let contour = contours.get(i);
+                let contour = contours.get(index);
                 let bounds = cv.boundingRect(contour);
 
                 // is roughly a square
@@ -134,18 +79,17 @@ export function load_map_from_image(image) {
                     let area = bounds.width * bounds.height;
 
                     if (area > largest_area) {
-                        board_contour_index = i;
-                        board_bounds = bounds;
+                        board_contour_index = index;
                         largest_area = area;
                     }
                 }
             }
 
             if (next >= 0)
-                i = next;
+                index = next;
             
             else if (queue.length > 0)
-                i = queue.shift();
+                index = queue.shift();
 
             else {
                 reject('board not found');
@@ -168,7 +112,7 @@ export function load_map_from_image(image) {
         while (child_index !== -1) {
             let bounds = cv.boundingRect(contours.get(child_index));
 
-            if (bounds.width > 50) {
+            if (bounds.width > 20 && bounds.height > 20) {
                 children.push({index: child_index, bounds});
                 loops++;
             }
@@ -183,7 +127,7 @@ export function load_map_from_image(image) {
             child_index = hierarchy.intPtr(0, child_index)[0];
         }
 
-        console.log('loops:', loops);
+        console.log('valid tiles:', loops);
 
         let divisions = Math.sqrt(loops);
 
@@ -192,7 +136,7 @@ export function load_map_from_image(image) {
 
         console.log('divisions:', divisions);
 
-        let color_hashes = [];
+        let color_map = [];
         let threshold = 10;
         let map = [];
 
@@ -205,11 +149,12 @@ export function load_map_from_image(image) {
             let row = children.splice(children.length - divisions, divisions);
             row = row.sort((a, b) => a.bounds.x - b.bounds.x);
 
-            label: for (let x = 0; x < divisions; x++) {
-                let bounds = row[x].bounds;
+            color_found: for (let x = 0; x < divisions; x++) {
                 let index = row[x].index;
+                let bounds = row[x].bounds;
+                let tile = img.roi(bounds);
 
-                let M = cv.matFromArray(2, 3, cv.CV_64F,
+                let transformation = cv.matFromArray(2, 3, cv.CV_64F,
                         [1, 0, -bounds.x,
                          0, 1, -bounds.y]);
 
@@ -219,64 +164,70 @@ export function load_map_from_image(image) {
                 // copy.delete();
 
                 let contour = contours.get(index);
-                cv.transform(contour, contour, M);
 
+                cv.transform(contour, contour, transformation);
                 new_contours.push_back(contour);
 
-                let child = hierarchy.intPtr(0, index)[2];
-                let tile = img.roi(bounds);
+                let child_index = hierarchy.intPtr(0, index)[2];
 
                 let mask = new cv.Mat.zeros(tile.rows, tile.cols, cv.CV_8UC1);
                 cv.drawContours(mask, new_contours, new_contours.size() - 1, new cv.Scalar(255), -1);
-                // cv.imshow('o1', mask);
 
-                if (child !== -1) {
-                    contour = contours.get(child);
-
-                    cv.transform(contour, contour, M);
+                if (child_index !== -1) {
+                    contour = contours.get(child_index);
                     new_contours.push_back(contour);
 
+                    cv.transform(contour, contour, transformation);
                     cv.drawContours(mask, new_contours, new_contours.size() - 1, new cv.Scalar(0), -1);
                 }
 
                 // await new Promise((resolve, _) => setTimeout(resolve, 100));
-                cv.imshow('o1', tile);
-                cv.imshow('o2', mask);
+                // cv.imshow('o1', tile);
+                // cv.imshow('o2', mask);
+                // await new Promise((resolve, _) => setTimeout(resolve, 300));
 
-                let test = new cv.Mat();
+                let kernel = cv.Mat.ones(4, 4, cv.CV_8U);
+                cv.erode(mask, mask, kernel, new cv.Point(-1, -1), 1)
+                kernel.delete();
 
-                cv.bitwise_and(tile, tile, test, mask);
-                cv.imshow('o3', test);
+                // cv.imshow('o2', mask);
+                
+                let composite = new cv.Mat();
+                cv.bitwise_and(tile, tile, composite, mask);
 
-                let dominant_color_rgb = cv.mean(tile, mask);
+                // cv.imshow('o3', composite);
+                // await new Promise((resolve, _) => setTimeout(resolve, 300));
 
+                let tile_color = cv.mean(composite, mask).map(Math.round);
+
+                composite.delete();
                 mask.delete();
 
-                let dominant_color_as_hash = to_hash(dominant_color_rgb);
+                for (let i = 0; i < color_map.length; i++) {
+                    const color = color_map[i];
 
-                for (let i = 0; i < color_hashes.length; i++) {
-                    const hash = color_hashes[i];
-
-                    if (is_similar(from_hash(hash), dominant_color_rgb, threshold)) {
+                    if (is_similar(color, tile_color, threshold)) {
                         map[y][x] = i;
-                        continue label;
+                        continue color_found;
                     }
                 }
 
-                color_hashes.push(dominant_color_as_hash);
-                map[y][x] = color_hashes.length - 1;
+                color_map.push(tile_color);
+                map[y][x] = color_map.length - 1;
             }
         }
 
         contours.delete();
         hierarchy.delete();
 
-        if (color_hashes.length !== divisions)
+        console.log('colors:', color_map);
+
+        if (color_map.length !== divisions)
             return reject('dimension miss match');
 
         img.delete();
 
-        let color_map = color_hashes.map(hash => `rgb(${from_hash(hash).join(',')})`);
+        color_map = color_map.map(color => `rgb(${color.join(',')})`);
 
         resolve({color_map, map});
     });
