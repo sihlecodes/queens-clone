@@ -8,7 +8,8 @@ const States = {
 }
 
 export class InputStateHandler {
-    constructor() {
+    constructor(board) {
+        this.board = board;
         this.reset();
 
         this.handlers = {
@@ -86,7 +87,7 @@ export class InputStateHandler {
     }
 
     handle_hover(relative_pos) {
-        const previous_relative_pos = Board.to_relative_position(
+        const previous_relative_pos = this.board.to_relative_position(
             this.previous_global_pos.x, this.previous_global_pos.y);
 
         if (relative_pos.x !== previous_relative_pos.x ||
@@ -114,7 +115,7 @@ export class InputStateHandler {
                 return;
 
         if (!this.mouse_moved && name === 'touchmove') {
-            const initial_relative_pos = Board.to_relative_position(
+            const initial_relative_pos = this.board.to_relative_position(
                 this.previous_global_pos.x, this.previous_global_pos.y);
 
             this.handle_drag_action(initial_relative_pos);

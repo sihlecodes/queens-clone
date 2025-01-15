@@ -1,6 +1,10 @@
 export class SVGToCanvasContext {
     constructor(svg) {
         this.svg = svg;
+        this.clear();
+    }
+
+    clear() {
         this.path = [];
 
         this.strokeStyle = 'black';
@@ -59,6 +63,11 @@ export class SVGToCanvasContext {
     extract(x, y, width, height, tolerance=1) {
         const generator = this.extract_all(x, y, width, height, tolerance);
         return generator.next().value;
+    }
+
+    add_line(start_x, start_y, end_x, end_y) {
+        this.moveTo(start_x, start_y);
+        this.lineTo(end_x, end_y);
     }
 
     clearRect(x, y, width, height) {
@@ -148,10 +157,21 @@ export class SVGToCanvasContext {
 }
 
 export class LayeredSVGToCanvasContext extends SVGToCanvasContext {
-    constructor(svg, name = 'root', layers={}) {
+    constructor(svg, name = 'root', layers={}, root = null) {
         super(svg);
         this.name = name;
         this.layers = layers;
+        this.root = root ?? this;
+    }
+
+    clear() {
+        super.clear();
+
+        if (!this.root || this.root === this)
+            return;
+
+        while (this.svg.firstChild)
+            this.svg.removeChild(this.svg.firstChild);
     }
 
     layer(name) {
@@ -164,7 +184,7 @@ export class LayeredSVGToCanvasContext extends SVGToCanvasContext {
                 this.append_child(group);
             }
 
-            this.layers[name] = new LayeredSVGToCanvasContext(group, name, this.layers);
+            this.layers[name] = new LayeredSVGToCanvasContext(group, name, this.layers, this.root);
         }
 
         return this.layers[name];

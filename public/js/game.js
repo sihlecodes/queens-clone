@@ -2,28 +2,28 @@ import { Renderer } from './render.js';
 import { Board, Marks } from './board.js';
 import { InputStateHandler } from './input_handler.js';
 import { Configuaration } from './configure.js';
+import { load_map_from_image } from './load_map.js';
 
 // Undefined properties are populated during runtime
 export const Global = {
-    TILE_SIZE: undefined,
     ...Configuaration,
 };
 
 class Game {
-    start() {
+    constructor() {
         this.canvas = document.getElementById('canvas');
 
-        const width = this.canvas.clientWidth;
-        const height = this.canvas.clientHeight;
+        const { clientWidth , clientHeight } = this.canvas;
 
-        this.board = new Board(Global.map);
-        this.renderer = new Renderer(this.canvas, this.board, width, height);
-        this.input = new InputStateHandler();
+        this.board = new Board(Global.map, clientWidth, clientHeight);
+        this.renderer = new Renderer(Global.theme, this.canvas, this.board);
+        this.input = new InputStateHandler(this.board);
+        this.timer = undefined;
         this.reset();
+    }
 
+    start() {
         const { canvas, board, renderer, input } = this;
-
-        Global.TILE_SIZE = (Math.min(width, height) - Global.RENDER_OFFSET * 2) / board.columns();
 
         board.handlers.on_mark_applied = (x, y) => renderer.render_mark(x, y);
         board.handlers.on_remove_queen = () => renderer.clear_invalid_cells();
@@ -58,21 +58,52 @@ class Game {
         input.handlers.on_mark = (x, y) => board.set_mark(x, y, Marks.BASIC);
         input.handlers.on_toggle = (x, y) => board.cycle_mark(x, y);
 
-        renderer.render_board();
+        renderer.render_board(Global.theme.color_map);
 
         this.register_mouse_events(board, canvas, input);
-        this.register_button_actions();
+        this.register_actions();
     }
 
-    register_button_actions() {
-        const btn_clear = document.getElementById('btn-clear');
-        const btn_new = document.getElementById('btn-new');
+    async load_map(image) {
+        cv = await cv;
 
+        load_map_from_image(image).then((response) => {
+            this.reset();
+            this.board.reset(response.map);
+            this.renderer.reset();
+            this.renderer.render_board(response.color_map);
+
+        }).catch((reason) => {
+            console.log(reason);
+        });
+    }
+
+    register_actions() {
+        const btn_clear = document.getElementById('btn-clear');
+        const btn_load = document.getElementById('btn-load');
+        const file_picker = document.getElementById('file-picker');
+        const image = document.getElementById('load-target');
+
+        image.onload = () => this.load_map(image);
+
+        file_picker.onchange = (e) => {
+            let file = e.target.files[0];
+
+            if (!file)
+                return;
+
+            let reader = new FileReader();
+
+            reader.onload = (e) => image.src = e.target.result;
+            reader.readAsDataURL(file);
+        };
+
+        btn_load.onclick = () => file_picker.click();
         btn_clear.onclick = () => this.clear();
     }
 
     register_mouse_events(board, element, input_handler) {
-        element.addEventListener('contextmenu', e => e.preventDefault());
+        element.oncontextmenu = (e) => e.preventDefault();
 
         element.add_event_listener = function(name, tr) {
             this.addEventListener(name, function(e) {
@@ -113,7 +144,7 @@ class Game {
 
     clear() {
         this.board.clear();
-        this.renderer.clear();
+        this.renderer.clear_marks();
         this.input.enable();
 
         if (this.completed)
@@ -122,11 +153,15 @@ class Game {
 
     reset() {
         this.time = 0;
-        this.update_elapsed_time(); // set the ui to 0:00
+        this.update_elapsed_time();
 
         this.completed = false;
-        this.timer = undefined;
         this.input.reset();
+
+        if (this.timer)
+            clearInterval(this.timer);
+
+        this.timer = undefined;
     }
 }
 

@@ -12,37 +12,38 @@ const Layers = {
     HOVER: 'hover',
 };
 
-function add_line(ctx, start_x, start_y, end_x, end_y) {
-    ctx.moveTo(start_x, start_y);
-    ctx.lineTo(end_x, end_y);
-}
-
 export class Renderer {
-    constructor(canvas, board, width, height) {
+    constructor(styles, canvas, board) {
         this.canvas = new LayeredSVGToCanvasContext(canvas);
-        this.canvas.width = width;
-        this.canvas.height = height;
 
         // create layers upfront (sets the draw order)
         for (const layer of Object.values(Layers))
             this.canvas.layer(layer);
 
-        this.color_map = Global.theme.color_map;
+        this.clear_meta();
         this.board = board;
-
-        this.clear_meta_invalid();
-        this.styles = Global.theme;
+        this.styles = styles;
     }
 
-    clear_meta_invalid() {
+    clear_meta() {
         this.invalid_marks = [];
         this.invalid_queens = [];
     }
 
-    clear() {
-        this.clear_meta_invalid();
-        this.canvas.layer(Layers.MARKS).clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.canvas.layer(Layers.ERRORS).clearRect(0, 0, this.canvas.width, this.canvas.height);
+    clear_marks() {
+        this.clear_meta();
+        this.canvas.layer(Layers.MARKS).clear();
+        this.canvas.layer(Layers.ERRORS).clear();
+    }
+
+    clear_board() {
+        this.canvas.layer(Layers.OUTLINES).clear();
+        this.canvas.layer(Layers.BOARD).clear();
+    }
+
+    reset() {
+        this.clear_board();
+        this.clear_marks();
     }
 
     animate_completion() {
@@ -71,7 +72,7 @@ export class Renderer {
     }
 
     render_mouse_position(x, y) {
-        const { TILE_SIZE } = Global;
+        const TILE_SIZE = this.board.get_tile_size();
 
         if (!this.board.within_bounds(x, y))
             return;
@@ -84,12 +85,11 @@ export class Renderer {
     }
 
     clear_mouse_position() {
-        const ctx = this.canvas.layer(Layers.HOVER);
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.canvas.layer(Layers.HOVER).clear();
     }
 
     render_invalid_cells(cells) {
-        const { TILE_SIZE } = Global;
+        const TILE_SIZE = this.board.get_tile_size();
         const { invalid } = this.styles;
 
         const ctx = this.canvas.layer(Layers.ERRORS);
@@ -121,16 +121,16 @@ export class Renderer {
     }
 
     clear_invalid_cells() {
-        this.canvas.layer(Layers.ERRORS).clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.canvas.layer(Layers.ERRORS).clear();
 
         for (const queen of this.invalid_queens)
             queen.setAttribute('filter', 'none');
 
-        this.clear_meta_invalid();
+        this.clear_meta();
     }
 
     render_mark(x, y) {
-        const { TILE_SIZE } = Global;
+        const TILE_SIZE = this.board.get_tile_size();
         const { board } = this;
 
         const ctx = this.canvas.layer(Layers.MARKS);
@@ -156,8 +156,8 @@ export class Renderer {
                 ctx.beginPath();
                 ctx.lineWidth = 1;
 
-                add_line(ctx, left_x, top_y, right_x, bottom_y);
-                add_line(ctx, right_x, top_y, left_x, bottom_y);
+                ctx.add_line(left_x, top_y, right_x, bottom_y);
+                ctx.add_line(right_x, top_y, left_x, bottom_y);
 
                 const annotation = ctx.stroke();
                 annotation.type = Marks.BASIC;
@@ -180,10 +180,10 @@ export class Renderer {
         }
     }
 
-    render_board() {
-        const { TILE_SIZE } = Global;
+    render_board(color_map) {
         const { board } = this;
         const { outer, inner } = this.styles.outlines;
+        const TILE_SIZE = this.board.get_tile_size();
 
         let ctx = this.canvas.layer(Layers.BOARD);
         let outlines = this.canvas.layer(Layers.OUTLINES);
@@ -199,23 +199,21 @@ export class Renderer {
             ctx.rect(pos.x, pos.y, TILE_SIZE, TILE_SIZE);
 
             // draw individual board tiles
-            ctx.fillStyle = this.styles.color_map[color];
+            ctx.fillStyle = color_map[color];
             ctx.stroke();
 
             // draw borders between color regions
             let next_color = board.get_color(x + 1, y);
 
             if (next_color >= 0 && color !== next_color)
-                add_line(outlines,
-                    pos.x + TILE_SIZE, pos.y,
-                    pos.x + TILE_SIZE, pos.y + TILE_SIZE);
+                outlines.add_line(pos.x + TILE_SIZE, pos.y,
+                             pos.x + TILE_SIZE, pos.y + TILE_SIZE);
 
             next_color = board.get_color(x, y + 1);
 
             if (next_color >= 0 && color !== next_color)
-                add_line(outlines,
-                    pos.x, pos.y + TILE_SIZE,
-                    pos.x + TILE_SIZE, pos.y + TILE_SIZE);
+                outlines.add_line(pos.x,        pos.y + TILE_SIZE,
+                             pos.x + TILE_SIZE, pos.y + TILE_SIZE);
         });
 
         outlines.stroke();
@@ -228,10 +226,10 @@ export class Renderer {
         outlines.strokeStyle = outer.border.color;
         outlines.lineWidth = outer.border.width;
 
-        add_line(outlines, start.x, start.y, end.x, start.y);
-        add_line(outlines, end.x, start.y, end.x, end.y);
-        add_line(outlines, end.x, end.y, start.x, end.y);
-        add_line(outlines, start.x, end.y, start.x, start.y);
+        outlines.add_line(start.x, start.y, end.x, start.y);
+        outlines.add_line(end.x, start.y, end.x, end.y);
+        outlines.add_line(end.x, end.y, start.x, end.y);
+        outlines.add_line(start.x, end.y, start.x, start.y);
 
         outlines.stroke();
     }
