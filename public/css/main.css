@@ -1,0 +1,155 @@
+body {
+   --color-border: lightgray;
+   --color-banner-background: white;
+   --color-text: #333;
+   --spacing: 15px;
+   --padding: var(--spacing);
+   --padding-extra: 20px;
+   --paragraph-spacing: 10px;
+
+   color: var(--color-text);
+   margin: 0;
+   padding: 0;
+   background-color: #f6f4ef;
+   font-family: sans-serif;
+}
+
+img.queen {
+   width: 16px;
+   aspect-ratio: 1;
+}
+
+img.clock {
+   width: 15px;
+   margin-right: calc(var(--spacing) / 3);
+}
+
+.hidden { display: none; }
+.banner {
+   display: flex;
+   flex-direction: column;
+   min-height: 100vh;
+   padding: 0 var(--padding);
+   padding-top: var(--padding);
+   background-color: var(--color-banner-background);
+}
+
+.time-container {
+   text-align: center;
+   margin-bottom: var(--spacing);
+   font-size: large;
+   font-weight: 600;
+}
+
+#canvas {
+   width: 100%;
+   aspect-ratio: 1;
+   touch-action: none;
+   -webkit-user-select: none;
+   user-select: none;
+}
+
+.controls {
+   display: flex;
+   margin-top: var(--spacing);
+}
+
+.controls button {
+   color: var(--color-text);
+   flex: 1;
+   font-size: 12pt;
+   font-weight: bold;
+   fill: inherit;
+   background-color: inherit;
+   border: 1px solid #444;
+   border-radius: 25px;
+   outline: none;
+   padding: 7px;
+   cursor: pointer;
+   transition: border-width margin 0.5s ease-out;
+   box-sizing: border-box;
+   margin: 1px;
+   margin-right: var(--spacing);
+}
+
+.controls button:hover {
+   border-width: 2px;
+   margin: 0px;
+   margin-right: var(--spacing);
+}
+
+.controls button:last-child {
+   margin-right: 0;
+}
+
+.controls button.disabled {
+   background-color: lightgray;
+   color: gray;
+   border: none;
+   cursor: not-allowed;
+}
+
+.text-block {
+   font-size: smaller;
+   margin: var(--spacing) 0;
+   padding: var(--padding-extra) var(--padding);
+   padding-bottom: var(--padding-extra);
+   border: 1px solid var(--color-border);
+   border-radius: 2px;
+}
+
+.text-block ol { padding-left: inherit; margin: 0 }
+.text-block li { margin-top: var(--paragraph-spacing); }
+
+.instructions { margin-bottom: 0;}
+
+.examples-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+   gap: var(--spacing);
+   margin-top: var(--spacing);
+}
+
+.examples-grid .card p { margin: var(--paragraph-spacing) 0 0 0; }
+
+.animate { animation: pulse 1s; }
+
+@media (min-width: 400px) {
+   .banner {
+      width: 400px;
+      margin: auto;
+   }
+}
+
+@keyframes pulse {
+0% {
+   transform:
+      translate(var(--center-x), var(--center-y))
+      scale(1)
+
+      translate(
+      calc(-1 * var(--center-x)),
+      calc(-1 * var(--center-y))
+      );
+}
+50% {
+   transform:
+      translate(var(--center-x), var(--center-y))
+      scale(1.4)
+
+      translate(
+      calc(-1 * var(--center-x)),
+      calc(-1 * var(--center-y))
+      );
+}
+100% {
+   transform:
+      translate(var(--center-x), var(--center-y))
+      scale(1)
+
+      translate(
+      calc(-1 * var(--center-x)),
+      calc(-1 * var(--center-y))
+      );
+}
+}
