@@ -21,9 +21,12 @@ function register_actions() {
     image.onload = async () => {
         cv = await cv;
 
-        load_map_from_image(image)
+        await load_map_from_image(image)
             .then((response) => game.reload(response))
             .catch((error) => console.log(error));
+
+        hide_loading_banner();
+
     };
 
     file_picker.onchange = (e) => {
@@ -32,28 +35,37 @@ function register_actions() {
         if (!file)
             return;
 
+        show_loading_banner();
+
         let reader = new FileReader();
 
         reader.onload = (e) => image.src = e.target.result;
         reader.readAsDataURL(file);
     };
 
-    btn_clear.onclick = () => game.clear();
-    btn_load.onclick = () => file_picker.click();
-}
-
-function hide_loading_banner() {
     const loader = document.getElementById('loading-banner');
-
-    setTimeout(() => {
-        loader.classList.add('closing');
-        document.getElementById('main-content-banner').classList.remove('hidden');
-    }, 500);
 
     document.getElementById('spinner').addEventListener('animationend', () => {
         loader.classList.add('hidden');
+
         loader.addEventListener('transitionend', () => {
             loader.classList.add('not-rendered');
         });
     });
+
+    btn_clear.onclick = () => game.clear();
+    btn_load.onclick = file_picker.click.bind(file_picker);
+}
+
+function show_loading_banner() {
+    document.getElementById('loading-banner')
+        .classList.remove('animate-closing', 'not-rendered', 'hidden');
+}
+
+function hide_loading_banner() {
+    setTimeout(() => {
+        document.getElementById('loading-banner')
+            .classList.add('animate-closing');
+    }, 500);
+
 }
