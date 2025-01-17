@@ -1,6 +1,6 @@
 const IDEAL_IMAGE_RESOLUTION = 1000;
 
-const COLOR_SIMILARITY_THRESHOLD = 5;
+const COLOR_SIMILARITY_THRESHOLD = 20;
 const TILE_PADDING_RATIO = 0.05;
 
 const MIN_BOARD_DIMENSION = 200;
@@ -10,11 +10,11 @@ export function load_map_from_image(image_element) {
     return new Promise((resolve, reject) => {
         let image = cv.imread(image_element);
 
-        const white = new cv.Scalar(255, 255, 255, 255);
+        const color = image.ucharPtr(1, 1);
         const ratio = IDEAL_IMAGE_RESOLUTION / Math.min(image.cols, image.rows);
 
         cv.resize(image, image, new cv.Size(ratio * image.cols, ratio * image.rows));
-        cv.copyMakeBorder(image, image, 10, 10, 10, 10, cv.BORDER_CONSTANT, white);
+        cv.copyMakeBorder(image, image, 10, 10, 20, 20, cv.BORDER_CONSTANT, color);
 
         let edges = new cv.Mat();
         cv.Canny(image, edges, 100, 200);
@@ -36,12 +36,16 @@ export function load_map_from_image(image_element) {
         edges.delete();
 
         let board_index = get_board_contour_index(contours, hierarchy);
+
+        if (board_index === -1)
+            return  reject('Could not find the board.');
+
         let children_data = get_children_contour_data(board_index, contours, hierarchy);
 
         let valid_tile_count = children_data.length;
         let divisions = Math.sqrt(valid_tile_count);
 
-        if (divisions === 0 || divisions !== Math.floor(divisions))
+        if (divisions < 4 || divisions !== Math.floor(divisions))
             return reject('Error while parsing the board');
 
         console.log('Board has divisions:', divisions);
