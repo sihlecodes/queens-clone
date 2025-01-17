@@ -7,6 +7,7 @@ main();
 
 function main() {
     register_actions();
+    hide_loading_banner();
 
     game.start();
 }
@@ -39,4 +40,20 @@ function register_actions() {
 
     btn_clear.onclick = () => game.clear();
     btn_load.onclick = () => file_picker.click();
+}
+
+function hide_loading_banner() {
+    const loader = document.getElementById('loading-banner');
+
+    setTimeout(() => {
+        loader.classList.add('closing');
+        document.getElementById('main-content-banner').classList.remove('hidden');
+    }, 500);
+
+    document.getElementById('spinner').addEventListener('animationend', () => {
+        loader.classList.add('hidden');
+        loader.addEventListener('transitionend', () => {
+            loader.classList.add('not-rendered');
+        });
+    });
 }

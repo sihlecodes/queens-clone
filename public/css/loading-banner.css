@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap');
+
+#loading-banner {
+   --bar-width: 60px;
+   --color-main: #695fdb;
+   --color-clone-text: var(--color-text);
+   --close-animation-duration: 0.55s;
+
+   height: 100%;
+   transition: opacity 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+#loading-banner h1 {
+   position: relative;
+   font-family: "Roboto", sans-serif;
+   font-size: 28pt;
+   top: -5px;
+   color: var(--color-main);
+   display: inline;
+}
+
+#loading-banner .subscript {
+   position: absolute;
+   font-size: 7pt;
+   right: 2px;
+   bottom: -4px;
+   color: var(--color-clone-text);
+}
+
+.closing .vbox {
+   animation: logo-close var(--close-animation-duration) ease-out forwards;
+}
+
+.closing .spinner {
+   animation: spinner-close var(--close-animation-duration) ease-out forwards;
+}
+
+.hbox {
+   display: flex;
+   flex-direction: column;
+   margin: auto;
+   margin-top: 30vh;
+}
+
+.vbox {
+   display: flex;
+   justify-content: center;
+   margin: auto;
+   gap: 5px;
+}
+
+img.queen-icon {
+   margin: auto;
+   width: 30px;
+   height: 30px;
+   background-color: var(--color-main);
+   border-radius: 3px;
+   padding: 5px;
+}
+
+.spinner {
+   margin: auto;
+   width: 70%;
+   height: 2px;
+   border-radius: 2px;
+   position: relative;
+   background: rgba(0, 0, 0, 0.2);
+   overflow: hidden;
+}
+
+.spinner::after {
+   content: '';
+   width: var(--bar-width);
+   height: inherit;
+   background: var(--color-main);
+   position: absolute;
+   box-sizing: border-box;
+   animation: sweep .7s ease-in-out infinite alternate;
+}
+
+@keyframes sweep {
+0% {
+   transform: translateX(-50%);
+}
+
+100% {
+   transform: translateX(150%);
+}
+}
+
+@keyframes spinner-close {
+0% {
+   width: 50%;
+   opacity: 1;
+}
+
+50% {
+   opacity: 1;
+}
+
+51% {
+   width: 25%;
+   opacity: 0;
+}
+
+100% {
+   opacity: 0;
+}
+}
+
+@keyframes logo-close {
+60% {
+   opacity: 0.5;
+   transform: translateY(10px);
+}
+
+100% {
+   opacity: 0;
+   transform: translateY(10px);
+}
+}
