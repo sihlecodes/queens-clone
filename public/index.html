@@ -3,14 +3,14 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" type="image/svg+xml" href="./favicon/light.svg" media="(prefers-color-scheme: light)">
-        <link rel="icon" type="image/svg+xml" href="./favicon/dark.svg" media="(prefers-color-scheme: dark)">
-        <link rel="stylesheet" type="text/css" href="./css/main.css"></style>
+        <link rel="icon" type="image/svg+xml" href="images/queen.svg" media="(prefers-color-scheme: light)">
+        <link rel="icon" type="image/svg+xml" href="images/queen-light.svg" media="(prefers-color-scheme: dark)">
+        <link rel="stylesheet" type="text/css" href="css/main.css">
         <title>Queens Clone</title>
     </head>
     <body>
-        <div class="banner">
-            <div class="time-container"><img class="clock" src="./images/clock.svg" /><span id="time">0:00</span></div>
+        <div id="main-content-banner" class="banner">
+            <div class="time-container"><img class="clock" src="images/clock.svg"/><span id="time">0:00</span></div>
 
             <svg id="canvas">
                 <defs>
@@ -39,10 +39,10 @@
                 </defs>
             </svg>
 
-            <img id="load-target" class="hidden"/>
+            <img id="load-target" class="not-rendered"/>
 
             <div class="controls">
-                <input  id="file-picker" class="hidden" type="file" accept="image/*" />
+                <input  id="file-picker" class="not-rendered" type="file" accept="image/*"/>
                 <button id="btn-load">Load screenshot</button>
                 <button id="btn-clear">Clear</button>
             </div>
@@ -50,9 +50,9 @@
             <div class="instructions text-block">
                 <b>How to play</b>
                 <ol>
-                    <li>Your goal is to have <b>exactly one <img class="queen" src="./images/Queen.svg"/></b> in each <b>row, column, and color region.</b></li>
-                    <li>Tap once to place X and tap twice for <img class="queen" src="./images/Queen.svg"/></b>. Use X to mark where <img class="queen" src="./images/Queen.svg"/></b> cannot be placed.</li>
-                    <li>Two <img class="queen" src="./images/Queen.svg"/></b> cannot touch each other, not even diagonally.</li>
+                    <li>Your goal is to have <b>exactly one <img class="queen" src="images/queen.svg"/></b> in each <b>row, column, and color region.</b></li>
+                    <li>Tap once to place X and tap twice for <img class="queen" src="images/queen.svg"/></b>. Use X to mark where <img class="queen" src="images/Queen.svg"/></b> cannot be placed.</li>
+                    <li>Two <img class="queen" src="images/queen.svg"/></b> cannot touch each other, not even diagonally.</li>
                 </ol>
             </div>
 
@@ -61,26 +61,26 @@
 
                 <div class="examples-grid">
                     <div class="card">
-                        <img src="./images/example_01.svg" />
-                        <p>Each row can only have one <img class="queen" src="./images/Queen.svg"/>.</p>
+                        <img src="images/example_01.svg"/>
+                        <p>Each row can only have one <img class="queen" src="images/queen.svg"/>.</p>
                     </div>
                     <div class="card">
-                        <img src="./images/example_02.svg" />
-                        <p>Each column can also only have one <img class="queen" src="./images/Queen.svg"/>.</p>
+                        <img src="images/example_02.svg"/>
+                        <p>Each column can also only have one <img class="queen" src="images/queen.svg"/>.</p>
                     </div>
                     <div class="card">
-                        <img src="./images/example_03.svg" />
-                        <p>Each color region can also only have one <img class="queen" src="./images/Queen.svg"/>.</p>
+                        <img src="images/example_03.svg"/>
+                        <p>Each color region can also only have one <img class="queen" src="images/queen.svg"/>.</p>
                     </div>
                     <div class="card">
-                        <img src="./images/example_04.svg" />
-                        <p>Two <img class="queen" src="./images/Queen.svg"/> cannot touch each other, not even diagonally.</p>
+                        <img src="images/example_04.svg"/>
+                        <p>Two <img class="queen" src="images/queen.svg"/> cannot touch each other, not even diagonally.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <script src="./js/game.js" type="module"></script>
-        <script async src="./js/vendor/opencv.js" type="text/javascript"></script>
+        <script src="main.js" type="module"></script>
+        <script async src="js/vendor/opencv.js" type="text/javascript"></script>
     </body>
 </html>

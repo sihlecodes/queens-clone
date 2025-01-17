@@ -173,7 +173,7 @@ export class Renderer {
                 const y = pos.y + (TILE_SIZE - height) / 2;
 
                 const queen = ctx.drawImageFromSource(
-                    './images/Queen.svg', x, y, width, height);
+                    './images/queen.svg', x, y, width, height);
 
                 queen.type = Marks.QUEEN;
                 break;
@@ -207,13 +207,13 @@ export class Renderer {
 
             if (next_color >= 0 && color !== next_color)
                 outlines.add_line(pos.x + TILE_SIZE, pos.y,
-                             pos.x + TILE_SIZE, pos.y + TILE_SIZE);
+                                  pos.x + TILE_SIZE, pos.y + TILE_SIZE);
 
             next_color = board.get_color(x, y + 1);
 
             if (next_color >= 0 && color !== next_color)
                 outlines.add_line(pos.x,        pos.y + TILE_SIZE,
-                             pos.x + TILE_SIZE, pos.y + TILE_SIZE);
+                                  pos.x + TILE_SIZE, pos.y + TILE_SIZE);
         });
 
         outlines.stroke();

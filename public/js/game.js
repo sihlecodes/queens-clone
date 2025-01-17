@@ -2,14 +2,13 @@ import { Renderer } from './render.js';
 import { Board, Marks } from './board.js';
 import { InputStateHandler } from './input_handler.js';
 import { Configuaration } from './configure.js';
-import { load_map_from_image } from './load_map.js';
 
 // Undefined properties are populated during runtime
 export const Global = {
     ...Configuaration,
 };
 
-class Game {
+export class Game {
     constructor() {
         this.canvas = document.getElementById('canvas');
 
@@ -23,7 +22,13 @@ class Game {
     }
 
     start() {
-        const { canvas, board, renderer, input } = this;
+        this.register_handlers();
+        this.register_mouse_events();
+        this.renderer.render_board(Global.theme.color_map);
+    }
+
+    register_handlers() {
+        const { board, renderer, input } = this;
 
         board.handlers.on_mark_applied = (x, y) => renderer.render_mark(x, y);
         board.handlers.on_remove_queen = () => renderer.clear_invalid_cells();
@@ -41,9 +46,9 @@ class Game {
                 input.disable();
 
                 console.log('you win!');
+                document.getElementById('btn-clear').innerText = 'Restart';
             }
         };
-
 
         input.handlers.on_first_click = () => {
             this.timer = setInterval(() => {
@@ -57,55 +62,13 @@ class Game {
         input.handlers.on_clear = (x, y) => board.set_mark(x, y, Marks.NONE);
         input.handlers.on_mark = (x, y) => board.set_mark(x, y, Marks.BASIC);
         input.handlers.on_toggle = (x, y) => board.cycle_mark(x, y);
-
-        renderer.render_board(Global.theme.color_map);
-
-        this.register_mouse_events(board, canvas, input);
-        this.register_actions();
     }
 
-    async load_map(image) {
-        cv = await cv;
+    register_mouse_events() {
+        const { board, canvas, input } = this;
 
-        load_map_from_image(image).then((response) => {
-            this.reset();
-            this.board.reset(response.map);
-            this.renderer.reset();
-            this.renderer.render_board(response.color_map);
-
-        }).catch((reason) => {
-            console.log(reason);
-        });
-    }
-
-    register_actions() {
-        const btn_clear = document.getElementById('btn-clear');
-        const btn_load = document.getElementById('btn-load');
-        const file_picker = document.getElementById('file-picker');
-        const image = document.getElementById('load-target');
-
-        image.onload = () => this.load_map(image);
-
-        file_picker.onchange = (e) => {
-            let file = e.target.files[0];
-
-            if (!file)
-                return;
-
-            let reader = new FileReader();
-
-            reader.onload = (e) => image.src = e.target.result;
-            reader.readAsDataURL(file);
-        };
-
-        btn_load.onclick = () => file_picker.click();
-        btn_clear.onclick = () => this.clear();
-    }
-
-    register_mouse_events(board, element, input_handler) {
-        element.oncontextmenu = (e) => e.preventDefault();
-
-        element.add_event_listener = function(name, tr) {
+        canvas.oncontextmenu = (e) => e.preventDefault();
+        canvas.add_event_listener = function(name, tr) {
             this.addEventListener(name, function(e) {
                 let event = tr(e);
                 let rect = this.getBoundingClientRect();
@@ -118,20 +81,20 @@ class Game {
                 const relative_pos = board.to_relative_position(global_pos.x, global_pos.y);
                 const mark = board.get_mark(relative_pos.x, relative_pos.y);
 
-                input_handler.handle(name, global_pos, relative_pos, mark);
+                input.handle(name, global_pos, relative_pos, mark);
             });
         }
 
         const nop = (e) => e;
         const first_touch = (e) => e.touches[0];
 
-        element.add_event_listener('mousedown', nop);
-        element.add_event_listener('mousemove', nop);
-        element.add_event_listener('mouseup', nop);
-        element.add_event_listener('mouseleave', nop);
-        element.add_event_listener('touchstart', first_touch);
-        element.add_event_listener('touchmove', first_touch);
-        element.add_event_listener('touchend', nop);
+        canvas.add_event_listener('mousedown', nop);
+        canvas.add_event_listener('mousemove', nop);
+        canvas.add_event_listener('mouseup', nop);
+        canvas.add_event_listener('mouseleave', nop);
+        canvas.add_event_listener('touchstart', first_touch);
+        canvas.add_event_listener('touchmove', first_touch);
+        canvas.add_event_listener('touchend', nop);
     }
 
     update_elapsed_time() {
@@ -162,7 +125,13 @@ class Game {
             clearInterval(this.timer);
 
         this.timer = undefined;
+        document.getElementById('btn-clear').innerText = 'Clear';
+    }
+
+    reload({ color_map, map }) {
+        this.reset();
+        this.board.reset(map);
+        this.renderer.reset();
+        this.renderer.render_board(color_map);
     }
 }
-
-new Game().start();
