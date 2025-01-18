@@ -58,10 +58,10 @@ export class Game {
         }
 
         input.handlers.on_hover_changing = () => renderer.clear_mouse_position();
-        input.handlers.on_hover_changed = (x, y) => renderer.render_mouse_position(x, y);
-        input.handlers.on_clear = (x, y) => board.set_mark(x, y, Marks.NONE);
-        input.handlers.on_mark = (x, y) => board.set_mark(x, y, Marks.BASIC);
-        input.handlers.on_toggle = (x, y) => board.cycle_mark(x, y);
+        input.handlers.on_hover_changed = ({x, y}) => renderer.render_mouse_position(x, y);
+        input.handlers.on_clear = ({x, y}) => board.set_mark(x, y, Marks.NONE);
+        input.handlers.on_mark = ({x, y}) => board.set_mark(x, y, Marks.BASIC);
+        input.handlers.on_toggle = ({x, y}) => board.cycle_mark(x, y);
     }
 
     register_mouse_events() {

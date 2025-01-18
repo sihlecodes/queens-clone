@@ -1,4 +1,4 @@
-import { Board, Marks } from './board.js'
+import { Marks } from './board.js'
 
 const States = {
     NOP: 0,
@@ -92,19 +92,19 @@ export class InputStateHandler {
 
         if (relative_pos.x !== previous_relative_pos.x ||
             relative_pos.y !== previous_relative_pos.y) {
-                this.handlers.on_hover_changing?.(previous_relative_pos.x,previous_relative_pos.y);
-                this.handlers.on_hover_changed?.(relative_pos.x, relative_pos.y);
+                this.handlers.on_hover_changing?.(previous_relative_pos);
+                this.handlers.on_hover_changed?.(relative_pos);
         }
     }
 
     handle_drag_action(relative_pos) {
         switch (this.state) {
             case States.CLEARING:
-                this.handlers.on_clear?.(relative_pos.x, relative_pos.y);
+                this.handlers.on_clear?.(relative_pos);
                 break;
 
             case States.MARKING:
-                this.handlers.on_mark?.(relative_pos.x, relative_pos.y);
+                this.handlers.on_mark?.(relative_pos);
                 break;
         }
     }
@@ -134,6 +134,6 @@ export class InputStateHandler {
         this.state = States.NOP;
 
         if(!this.mouse_moved)
-            this.handlers.on_toggle?.(relative_pos.x, relative_pos.y);
+            this.handlers.on_toggle?.(relative_pos);
     }
 }
