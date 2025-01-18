@@ -85,16 +85,20 @@ export class Game {
             });
         }
 
-        const nop = (e) => e;
+        const noop = (e) => e;
         const first_touch = (e) => e.touches[0];
+        const first_changed_touch = (e) => e.changedTouches[0];
 
-        canvas.add_event_listener('mousedown', nop);
-        canvas.add_event_listener('mousemove', nop);
-        canvas.add_event_listener('mouseup', nop);
-        canvas.add_event_listener('mouseleave', nop);
+        if (!('ontouchstart' in window)) {
+            canvas.add_event_listener('mousedown', noop);
+            canvas.add_event_listener('mousemove', noop);
+            canvas.add_event_listener('mouseleave', noop);
+            canvas.add_event_listener('mouseup', noop);
+        }
+
         canvas.add_event_listener('touchstart', first_touch);
         canvas.add_event_listener('touchmove', first_touch);
-        canvas.add_event_listener('touchend', nop);
+        canvas.add_event_listener('touchend', first_changed_touch);
     }
 
     update_elapsed_time() {

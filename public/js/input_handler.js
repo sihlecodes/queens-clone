@@ -1,7 +1,7 @@
 import { Marks } from './board.js'
 
 const States = {
-    NOP: 0,
+    NOOP: 0,
     MARKING: 1,
     CLEARING: 2,
 }
@@ -24,7 +24,7 @@ export class InputStateHandler {
     }
 
     reset() {
-        this.state = States.NOP;
+        this.state = States.NOOP;
         this.previous_relative_pos = {x: 0, y: 0};
 
         this.starting_pos = {
@@ -63,7 +63,7 @@ export class InputStateHandler {
                 break;
 
             case 'mouseleave':
-                this.state = States.NOP;
+                this.state = States.NOOP;
                 this.handle_hover(relative_pos);
                 break;
         }
@@ -78,7 +78,7 @@ export class InputStateHandler {
                 return States.CLEARING;
 
             default:
-                return States.NOP;
+                return States.NOOP;
         }
     }
 
@@ -121,7 +121,7 @@ export class InputStateHandler {
     }
 
     handle_mouse_move(global_pos, relative_pos, mark) {
-        if (this.state === States.NOP)
+        if (this.state === States.NOOP)
             return;
 
         if (!this.mouse_moved) {
@@ -146,7 +146,7 @@ export class InputStateHandler {
     }
 
     handle_mouse_up(relative_pos) {
-        this.state = States.NOP;
+        this.state = States.NOOP;
 
         if(!this.mouse_moved)
             this.handlers.on_toggle?.(relative_pos);
