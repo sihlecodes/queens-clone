@@ -4,8 +4,9 @@ const States = {
     NOP: 0,
     MARKING: 1,
     CLEARING: 2,
-    DRAGGING: 4,
 }
+
+const DRAG_IGNORE_RADIUS = 8;
 
 export class InputStateHandler {
     constructor(board) {
@@ -24,9 +25,15 @@ export class InputStateHandler {
 
     reset() {
         this.state = States.NOP;
-        this.previous_global_pos = {x: 0, y: 0};
+        this.previous_relative_pos = {x: 0, y: 0};
+
+        this.starting_pos = {
+            global:   {x: 0, y: 0},
+            relative: {x: 0, y: 0},
+        };
+
+        this.first_clicked = false;
         this.mouse_moved = false;
-        this.is_first_click = true;
         this.disabled = false;
     }
 
@@ -40,14 +47,14 @@ export class InputStateHandler {
         switch (name) {
             case 'touchstart':
             case 'mousedown':
-                this.handle_mouse_down(global_pos, mark);
+                this.handle_mouse_down(global_pos, relative_pos, mark);
                 break;
 
             case 'mousemove':
                 this.handle_hover(relative_pos);
 
             case 'touchmove':
-                this.handle_mouse_move(name, global_pos, relative_pos, mark);
+                this.handle_mouse_move(global_pos, relative_pos, mark);
                 break;
 
             case 'touchend':
@@ -75,26 +82,30 @@ export class InputStateHandler {
         }
     }
 
-    handle_mouse_down(global, mark) {
-        if (this.is_first_click) {
+    handle_mouse_down(global_pos, relative_pos, mark) {
+        if (!this.first_clicked) {
             this.handlers.on_first_click?.();
-            this.is_first_click = false;
+            this.first_clicked = true;
         }
 
         this.state = this.get_next_state(mark);
-        this.previous_global_pos = global;
+
+        this.starting_pos = {
+            global: global_pos,
+            relative: relative_pos,
+        }
+
         this.mouse_moved = false;
     }
 
     handle_hover(relative_pos) {
-        const previous_relative_pos = this.board.to_relative_position(
-            this.previous_global_pos.x, this.previous_global_pos.y);
-
-        if (relative_pos.x !== previous_relative_pos.x ||
-            relative_pos.y !== previous_relative_pos.y) {
-                this.handlers.on_hover_changing?.(previous_relative_pos);
+        if (relative_pos.x !== this.previous_relative_pos.x ||
+            relative_pos.y !== this.previous_relative_pos.y) {
+                this.handlers.on_hover_changing?.(this.previous_relative_pos);
                 this.handlers.on_hover_changed?.(relative_pos);
         }
+
+        this.previous_relative_pos = relative_pos;
     }
 
     handle_drag_action(relative_pos) {
@@ -109,25 +120,29 @@ export class InputStateHandler {
         }
     }
 
-    handle_mouse_move(name, global_pos, relative_pos, mark) {
-        if (this.previous_global_pos.x === global_pos.x &&
-            this.previous_global_pos.y === global_pos.y && !this.mouse_moved)
+    handle_mouse_move(global_pos, relative_pos, mark) {
+        if (this.state === States.NOP)
+            return;
+
+        if (!this.mouse_moved) {
+            const dx = this.starting_pos.global.x - global_pos.x;
+            const dy = this.starting_pos.global.y - global_pos.y;
+
+            if ((dx * dx + dy * dy) < Math.pow(DRAG_IGNORE_RADIUS, 2) &&
+                this.starting_pos.relative.x === relative_pos.x &&
+                this.starting_pos.relative.y === relative_pos.y)
                 return;
-
-        if (!this.mouse_moved && name === 'touchmove') {
-            const initial_relative_pos = this.board.to_relative_position(
-                this.previous_global_pos.x, this.previous_global_pos.y);
-
-            this.handle_drag_action(initial_relative_pos);
         }
 
-        this.previous_global_pos = global_pos;
+        if (!this.mouse_moved) {
+            this.handle_drag_action(this.starting_pos.relative);
+            this.mouse_moved = true;
+        }
 
         if (mark === Marks.QUEEN)
             return;
 
         this.handle_drag_action(relative_pos);
-        this.mouse_moved = true;
     }
 
     handle_mouse_up(relative_pos) {
