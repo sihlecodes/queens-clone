@@ -14,7 +14,7 @@
 #loading-banner h1 {
    position: relative;
    font-family: "Roboto", sans-serif;
-   font-size: 28pt;
+   font-size: 32pt;
    top: -5px;
    color: var(--color-main);
    display: inline;
@@ -22,10 +22,19 @@
 
 #loading-banner .subscript {
    position: absolute;
-   font-size: 7pt;
+   font-size: 9pt;
    right: 2px;
    bottom: -4px;
    color: var(--color-clone-text);
+}
+
+img.queen-icon {
+   margin: auto;
+   width: 34px;
+   height: 34px;
+   background-color: var(--color-main);
+   border-radius: 3px;
+   padding: 5px;
 }
 
 .animate-closing .vbox {
@@ -52,15 +61,6 @@
    margin: auto;
    gap: 5px;
    animation: none;
-}
-
-img.queen-icon {
-   margin: auto;
-   width: 30px;
-   height: 30px;
-   background-color: var(--color-main);
-   border-radius: 3px;
-   padding: 5px;
 }
 
 .spinner {
