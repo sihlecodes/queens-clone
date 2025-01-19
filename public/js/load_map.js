@@ -1,4 +1,4 @@
-const IDEAL_IMAGE_RESOLUTION = 1000;
+const MIN_IMAGE_RESOLUTION = 1000;
 
 const COLOR_SIMILARITY_THRESHOLD = 20;
 const TILE_PADDING_RATIO = 0.05;
@@ -11,9 +11,13 @@ export function load_map_from_image(image_element) {
         let image = cv.imread(image_element);
 
         const color = image.ucharPtr(1, 1);
-        const ratio = IDEAL_IMAGE_RESOLUTION / Math.min(image.cols, image.rows);
+        const min_dimension = Math.min(image.cols, image.rows);
 
-        cv.resize(image, image, new cv.Size(ratio * image.cols, ratio * image.rows));
+        if (min_dimension < MIN_IMAGE_RESOLUTION) {
+            const ratio = MIN_IMAGE_RESOLUTION / min_dimension;
+            cv.resize(image, image, new cv.Size(ratio * image.cols, ratio * image.rows));
+        }
+
         cv.copyMakeBorder(image, image, 10, 10, 20, 20, cv.BORDER_CONSTANT, color);
 
         let edges = new cv.Mat();
