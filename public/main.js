@@ -45,27 +45,28 @@ function register_actions() {
 
     const loader = document.getElementById('loading-banner');
 
-    document.getElementById('spinner').addEventListener('animationend', () => {
-        loader.classList.add('hidden');
+    loader.addEventListener('transitionend', () => {
+        loader.classList.add('not-rendered');
+    });
 
-        loader.addEventListener('transitionend', () => {
-            loader.classList.add('not-rendered');
-        });
+    document.querySelector('.spinner').addEventListener('animationend', () => {
+        loader.classList.add('hidden');
     });
 
     btn_clear.onclick = () => game.clear();
-    btn_load.onclick = file_picker.click.bind(file_picker);
+    btn_load.onclick = () => file_picker.click();
 }
 
 function show_loading_banner() {
+    document.querySelector('.spinner-bar').style.animationPlayState = 'running';
     document.getElementById('loading-banner')
         .classList.remove('animate-closing', 'not-rendered', 'hidden');
 }
 
 function hide_loading_banner() {
     setTimeout(() => {
-        document.getElementById('loading-banner')
-            .classList.add('animate-closing');
+        document.querySelector('.spinner-bar').style.animationPlayState = 'paused';
+        document.getElementById('loading-banner').classList.add('animate-closing');
     }, 500);
 
 }

@@ -8,7 +8,7 @@
 
    position: absolute;
    height: 100%;
-   transition: opacity 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+   transition: opacity 0.3s ease-in-out;
 }
 
 #loading-banner h1 {
@@ -28,6 +28,18 @@
    color: var(--color-clone-text);
 }
 
+#loading-banner .watermark {
+   position: absolute;
+   right: var(--padding);
+   font-size: small;
+   font-weight: bold;
+   color: var(--color-main);
+}
+
+#loading-banner .hbox {
+   margin-top: 30vh;
+}
+
 img.queen-icon {
    margin: auto;
    width: 34px;
@@ -37,22 +49,10 @@ img.queen-icon {
    padding: 5px;
 }
 
-.animate-closing .vbox {
-   animation: logo-close var(--close-animation-duration) ease-out forwards;
-}
-
-.animate-closing .spinner {
-   animation: spinner-close var(--close-animation-duration) ease-out forwards;
-}
-
 .hbox {
    display: flex;
    flex-direction: column;
    margin: auto;
-}
-
-#loading-banner .hbox {
-   margin-top: 30vh;
 }
 
 .vbox {
@@ -74,14 +74,35 @@ img.queen-icon {
    animation: none;
 }
 
-.spinner::after {
-   content: '';
+.spinner-bar {
    width: var(--bar-width);
    height: inherit;
    background: var(--color-main);
    position: absolute;
    box-sizing: border-box;
-   animation: sweep .7s ease-in-out infinite alternate;
+   animation: sweep 0.7s ease-in-out infinite alternate;
+}
+
+.animate-closing .watermark {
+   animation: fade-out var(--close-animation-duration) ease-out forwards;
+}
+
+.animate-closing .vbox {
+   animation: logo-close var(--close-animation-duration) ease-out forwards;
+}
+
+.animate-closing .spinner {
+   animation: spinner-close var(--close-animation-duration) ease-out forwards;
+}
+
+@keyframes fade-out {
+60% {
+   opacity: 0.5;
+}
+
+100% {
+   opacity: 0;
+}
 }
 
 @keyframes sweep {
@@ -95,22 +116,22 @@ img.queen-icon {
 }
 
 @keyframes spinner-close {
-0% {
-   width: 50%;
+0%, 70% {
    opacity: 1;
 }
 
-50% {
-   opacity: 1;
+45% {
+   width: 70%;
 }
 
-51% {
-   width: 25%;
-   opacity: 0;
+71% {
+   width: 20%;
+   opacity: 1;
 }
 
 100% {
    opacity: 0;
+   width: 0%;
 }
 }
 
