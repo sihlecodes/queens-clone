@@ -35,6 +35,45 @@ img.clock {
    background-color: var(--color-banner-background);
 }
 
+#error-popup {
+   display: none;
+   flex-direction: column;
+   position: fixed;
+   left: 50%;
+   top: 50%;
+   transform: translate(-50%, -50%);
+   width: min(75%, 360px);
+   padding: calc(var(--padding-extra) + 5px);
+   background-color: white;
+   border-radius: 5px;
+   box-shadow: 0px 0px 8px gray;
+   font-size: var(--font-size-normal);
+   user-select: none;
+}
+
+#error-popup .hint {
+   position: relative;
+   color: gray;
+   text-align: right;
+   font-size: var(--font-size-small);
+   margin-bottom: -10px;
+}
+
+#error-popup h1, h2 {
+   display: inline-block;
+   font-size: large;
+   margin: auto;
+   text-align: center;
+   width: 100%;
+   color: #cb4335;
+}
+
+#error-popup h2 {
+   font-size: var(--font-size-normal);
+   text-align: left;
+   color: black;
+}
+
 #main-content-banner {
    min-height: 100vh;
    padding: var(--padding);

@@ -23,7 +23,10 @@ function register_actions() {
 
         await load_map_from_image(image)
             .then((response) => game.reload(response))
-            .catch((error) => console.log(error));
+            .catch((error) => {
+                console.log(error);
+                show_error_popup();
+            });
 
         hide_loading_banner();
 
@@ -53,6 +56,10 @@ function register_actions() {
         loader.classList.add('hidden');
     });
 
+    document.addEventListener('click', () => {
+        hide_error_popup();
+    });
+
     btn_clear.onclick = () => game.clear();
     btn_load.onclick = () => file_picker.click();
 }
@@ -68,5 +75,14 @@ function hide_loading_banner() {
         document.querySelector('.spinner-bar').style.animationPlayState = 'paused';
         document.getElementById('loading-banner').classList.add('animate-closing');
     }, 500);
+}
 
+function show_error_popup() {
+    document.getElementById('error-popup').style.display = 'flex';
+    game.input.disable();
+}
+
+function hide_error_popup() {
+    document.getElementById('error-popup').style.display = 'none';
+    game.input.enable();
 }
