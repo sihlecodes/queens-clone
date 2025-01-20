@@ -2,10 +2,12 @@ body {
    --color-border: lightgray;
    --color-banner-background: white;
    --color-text: #333;
-   --spacing: 15px;
+   --spacing: 20px;
    --padding: var(--spacing);
-   --padding-extra: 20px;
+   --padding-extra: 25px;
    --paragraph-spacing: 10px;
+   --font-size-normal: 11pt;
+   --font-size-small: 8pt;
 
    color: var(--color-text);
    margin: 0;
@@ -36,7 +38,6 @@ img.clock {
 #main-content-banner {
    min-height: 100vh;
    padding: var(--padding);
-   padding-bottom: 0;
    gap: var(--spacing);
 }
 
@@ -97,15 +98,23 @@ img.clock {
 }
 
 .text-block {
-   font-size: smaller;
+   display: flex;
+   flex-direction: column;
+   gap: var(--paragraph-spacing);
+   font-size: var(--font-size-normal);
    padding: var(--padding-extra) var(--padding);
-   padding-bottom: var(--padding-extra);
    border: 1px solid var(--color-border);
    border-radius: 2px;
+   line-height: 1.4em;
 }
 
-.text-block ol { padding-left: inherit; margin: 0 }
-.text-block li { margin-top: var(--paragraph-spacing); }
+.text-block ol {
+   display: flex;
+   flex-direction: column;
+   padding-left: inherit;
+   margin: 0;
+   gap: var(--paragraph-spacing);
+}
 
 .instructions { margin-bottom: 0;}
 
@@ -113,10 +122,9 @@ img.clock {
    display: grid;
    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
    gap: var(--spacing);
-   margin-top: var(--spacing);
 }
 
-.examples-grid .card p { margin: var(--paragraph-spacing) 0 0 0; }
+.examples-grid .card p { margin: 0; }
 
 .animate { animation: pulse 1s; }
 
