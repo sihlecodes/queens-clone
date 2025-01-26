@@ -43,3 +43,16 @@
    border-radius: 5px;
 }
 
+.animate-popup {
+   animation: popup .2s ease-out;
+}
+
+@keyframes popup {
+0% {
+   transform: translate(-50%, -50%) scale(0.3);
+}
+100% {
+   transform: translate(-50%, -50%) scale(1);
+}
+}
+

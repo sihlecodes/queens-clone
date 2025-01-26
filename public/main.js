@@ -78,11 +78,17 @@ function hide_loading_banner() {
 }
 
 function show_error_popup() {
-    document.getElementById('error-popup').style.display = 'flex';
+    const error_popup = document.getElementById('error-popup');
+    error_popup.style.display = 'flex';
+    error_popup.classList.add('animate-popup');
+
     game.input.disable();
 }
 
 function hide_error_popup() {
-    document.getElementById('error-popup').style.display = 'none';
+    const error_popup = document.getElementById('error-popup');
+    error_popup.style.display = 'none';
+    error_popup.classList.remove('animate-popup');
+
     game.input.enable();
 }
