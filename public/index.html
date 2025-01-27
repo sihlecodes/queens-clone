@@ -45,7 +45,7 @@
 
             <div class="controls">
                 <input  id="file-picker" class="not-rendered" type="file" accept="image/*"/>
-                <button id="btn-load" class="disabled" disabled>Load screenshot</button>
+                <button id="btn-load" class="disabled" disabled>Loading Opencv...</button>
                 <button id="btn-clear">Clear</button>
             </div>
 
@@ -117,6 +117,7 @@
         <script type="text/javascript">
             function enable_load_button() {
                 const btn_load = document.getElementById('btn-load');
+                btn_load.innerText = "Load screenshot";
                 btn_load.classList.remove('disabled');
                 btn_load.removeAttribute('disabled');
             }
