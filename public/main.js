@@ -12,6 +12,8 @@ function main() {
     game.start();
 }
 
+let is_popup_deferred = false;
+
 function register_actions() {
     const btn_clear = document.getElementById('btn-clear');
     const btn_load = document.getElementById('btn-load');
@@ -25,7 +27,7 @@ function register_actions() {
             .then((response) => game.reload(response))
             .catch((error) => {
                 console.log(error);
-                show_error_popup();
+                is_popup_deferred = true;
             });
 
         hide_loading_banner();
@@ -54,6 +56,11 @@ function register_actions() {
 
     document.querySelector('.spinner').addEventListener('animationend', () => {
         loader.classList.add('hidden');
+
+        if (is_popup_deferred) {
+            show_error_popup();
+            is_popup_deferred = false;
+        }
     });
 
     document.addEventListener('click', () => {
