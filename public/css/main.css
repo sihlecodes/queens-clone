@@ -80,7 +80,7 @@ img.clock {
    -webkit-tap-highlight-color: transparent;
 }
 
-.controls button:hover {
+.controls button:not(.disabled):hover {
    border-width: 2px;
    background-color: rgba(0, 0, 0, 0.03);
    margin: 0;
