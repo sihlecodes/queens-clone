@@ -7,6 +7,7 @@
         <link rel="icon" type="image/svg+xml" href="images/queen-light.svg" media="(prefers-color-scheme: dark)">
         <link rel="stylesheet" type="text/css" href="css/main.css">
         <link rel="stylesheet" type="text/css" href="css/loading-banner.css">
+        <link rel="stylesheet" type="text/css" href="css/popup.css">
         <title>Queens Clone</title>
     </head>
     <body>
@@ -93,6 +94,23 @@
                 </div>
 
                 <span class="watermark">@sihlecodes</span>
+            </div>
+
+            <div id="error-popup" class="text-block">
+                <h1>Could not load the screenshot</h1>
+                <div class="reason">
+                    This could be due to a number of reasons, including,
+                    but not limited to, low image resolutions, uneven lighting conditions,
+                    or other objects being too close to the board.
+                </div>
+
+                <h2>General tips and notes for better results</h2>
+                <ol>
+                    <li>Try cropping the image closer to the edge of the board.</li>
+                    <li>If your board has an alternate colour scheme, this feature
+                        might struggle to recognise all the different colours.</li>
+                </ol>
+                <span class="hint">click to close</span>
             </div>
         </div>
 

@@ -12,6 +12,8 @@ function main() {
     game.start();
 }
 
+let is_popup_deferred = false;
+
 function register_actions() {
     const btn_clear = document.getElementById('btn-clear');
     const btn_load = document.getElementById('btn-load');
@@ -23,7 +25,10 @@ function register_actions() {
 
         await load_map_from_image(image)
             .then((response) => game.reload(response))
-            .catch((error) => console.log(error));
+            .catch((error) => {
+                console.log(error);
+                is_popup_deferred = true;
+            });
 
         hide_loading_banner();
 
@@ -51,6 +56,15 @@ function register_actions() {
 
     document.querySelector('.spinner').addEventListener('animationend', () => {
         loader.classList.add('hidden');
+
+        if (is_popup_deferred) {
+            show_error_popup();
+            is_popup_deferred = false;
+        }
+    });
+
+    document.addEventListener('click', () => {
+        hide_error_popup();
     });
 
     btn_clear.onclick = () => game.clear();
@@ -68,5 +82,20 @@ function hide_loading_banner() {
         document.querySelector('.spinner-bar').style.animationPlayState = 'paused';
         document.getElementById('loading-banner').classList.add('animate-closing');
     }, 500);
+}
 
+function show_error_popup() {
+    const error_popup = document.getElementById('error-popup');
+    error_popup.style.display = 'flex';
+    error_popup.classList.add('animate-popup');
+
+    game.input.disable();
+}
+
+function hide_error_popup() {
+    const error_popup = document.getElementById('error-popup');
+    error_popup.style.display = 'none';
+    error_popup.classList.remove('animate-popup');
+
+    game.input.enable();
 }
